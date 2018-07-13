@@ -1,0 +1,149 @@
+body {
+
+	font-family: 'Roboto Condensed', sans-serif;
+	margin-top: 70px;
+	background: url("Photos/background.jpg");/*linear-gradient(white, cyan, darkgrey, darkgrey, black);*/
+}
+
+.navbar-inverse .navbar-nav>li>a , .navbar-inverse .navbar-brand{
+    color: white;
+    font-size: 23px;
+}
+
+.fa-arrow-alt-circle-left, .fa-arrow-alt-circle-right {
+	position: fixed;
+	top: 50%;
+	font-size: 60px;
+	padding: 20px;
+	opacity: .6;
+	z-index: 9;
+}
+
+.fa-arrow-alt-circle-right {
+	right: 0;
+}
+
+.fa-arrow-alt-circle-left:hover, .fa-arrow-alt-circle-right:hover {
+	opacity: 1;
+}
+
+/*----------------------FOR ALL SECTIONS CSS-------------------------*/
+.content {
+}
+
+h3 {
+	font-size: 25px;
+	font-weight: 700;
+}
+
+p {
+	font-size: 23px;
+	text-indent: 30px;
+}
+
+img {
+	max-width: 80vw;
+}
+
+a {
+	color: black;
+}
+
+
+.hidden{
+	width: 0px;
+	transition: width 4s;
+}
+
+.showing{
+}
+
+.highlight{
+	border-bottom: 3px cyan solid;
+}
+
+/*----------------------ABOUT ME SECTION CSS-------------------------*/
+#About {
+	padding: 3% 10% 3% 10%;
+	height: 100%;
+}
+
+#ME {
+	width: 220px;
+	margin: 0px 0px 20px 40px;
+	float: right;
+}
+
+/*----------------------PHOTO SECTION CSS-------------------------*/
+
+
+img.rotating {
+	position: absolute;
+  	top: calc(50% + 25px);
+  	left: 50%;
+  	transform: translate(-50% , -50%);
+
+
+  	max-width: 80%;
+  	width: auto;
+  	
+  	max-height: 80%;
+  	
+	margin: auto;
+	border-radius: 20px;
+	box-shadow: 10px 10px 10px rgb(0, 0, 0, .2);
+}
+
+
+/*----------------------EDUCATION SECTION CSS-------------------------*/
+#EDU {
+	padding: 3% 10% 3% 10%;
+}
+
+
+
+/*PHOTOS*/
+#PLD {
+	height: 160px;
+	margin: auto 20px auto 20px;
+	float: right;
+}
+
+#VT {
+	height: 120px;
+	margin: 30px 30px 20px 10px;
+	float: left;
+}
+
+#Udemy {
+	height: 180px;
+	margin: auto 20px;
+	float: right;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
