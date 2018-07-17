@@ -20,48 +20,33 @@ function PhotoInit(){
 }
 
 
-var position = 0;
 
-function transition(pos){
-	$("#About").toggleClass("hidden", (pos != 1));
-	$("#photos").toggleClass("hidden", (pos != 0));
-	$("#EDU").toggleClass("hidden", (pos != 2));
-
-	$("#About").toggleClass("showing", (pos == 1));
-	$("#photos").toggleClass("showing", (pos == 0));
-	$("#EDU").toggleClass("showing", (pos == 2));
-
-	$("#AboutLink").toggleClass("highlight", (pos == 1));
-	$("#photosLink").toggleClass("highlight", (pos == 0));
-	$("#EDULink").toggleClass("highlight", (pos == 2));
+function plusSlides(n) {
+  	showSlides(slide += n);
 }
 
-function Change(num){
-	position = num
-	transition(position)
+function setSlide(n) {
+  	showSlides(slide = n);
+}
+
+function showSlides(n) {
+	var slides = $(".mySlides");
+
+	if (n >= slides.length) {slide = 0;}
+	if (n < 0) {slide = slides.length-1}
+	for (var i = 0; i < slides.length; i++) {
+		slides[i].style.display = "none";
+	}
+	slides[slide].style.display = "block";
+
+
+  	$("ul>li").removeClass("highlight");
+  	$("ul>li:nth-of-type("+(slide+1)+")").addClass("highlight");
 }
 
 
-function ActionsInit(){
-	var numStages = 3;
-	transition(0);
 
-	$(".right").on("click", function(){
-		position = (position + 1) % numStages;
 
-		transition(position);
-	});
-
-	$(".left").on("click", function(){
-		position = (position - 1) % numStages;
-		if (position < 0) 
-			position = position + numStages;
-		transition(position);
-	});
-
-}
-
+var slide = 0;
+showSlides(slide);
 PhotoInit();
-ActionsInit();
-
-
