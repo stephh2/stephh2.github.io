@@ -447,7 +447,7 @@ var sketchProc = function(processingInstance) {
 		    ellipse(215,92,10,10);
 		    strokeWeight(3);
 		    noFill();
-		    arc(200, 122, 27, 15, 0, 180);
+		    arc(200, 122, 27, 15, 0, PI);
 		    
 		    fill(238, 240, 206);
 		    triangle(120+190,180, 80+190,180,100+190,210);
