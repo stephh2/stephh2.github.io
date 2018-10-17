@@ -95,7 +95,7 @@ img.rotating {
 }
 
 #VT {
-	height: 120px;
+	height: 110px;
 	margin: 30px 30px 20px 10px;
 	float: left;
 }
@@ -109,9 +109,46 @@ img.rotating {
 
 /*----------------------COMING SOON SECTION CSS-------------------------*/
 
-.coming {
+.resumeLink {
 	text-align: center;
-	font-size: 60px;
-	padding-top: 10%;
+	font-size: 30px;
+	margin: 100px;
 }
 
+canvas {
+	max-height: 500px;
+	max-width: 500px;
+	padding: 30px;
+
+}
+
+table{
+	margin: auto;
+}
+
+#resumeCol{
+	text-align: center;
+	width: 100%;
+	font-size: 40px;
+}
+
+#resumeBut{
+	max-width: 300px;
+	width: 50%;
+	background: darkgrey;
+	border: black 2px solid;
+	border-radius: 10px
+}
+
+#contactHeader{
+	text-align: right;
+	width: 20%;
+	font-size: 40px;
+}
+
+#contactInfo{
+	padding: 80px;
+	text-align: left;
+	width: 60%;
+	font-size: 40px;
+}
