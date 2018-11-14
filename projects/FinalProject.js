@@ -2,28 +2,37 @@
 var sketchProc = function(processingInstance) {
     with (processingInstance) {
         size(400,400);
+		
 		{
 			//Variables for Game Play
 			angleMode = "radians";
-			var Mode = -2; 
+			var MainGameMode = -2; 
 			var keyArray = [];
 			var dif = 10;
 			var images = [];
 			var tileSize = 140;
-			var flyer = false;
-			var WALLS = [];
-			var TILES = [];
 
-			var dice = 0;
 			var count = 0;
 			var CountLimit = 0;
 			var shootFireworks = 0;
+			var offset = -400;
 
 			var centerX = -500;
 			var centerY = -400;
 
 			var mapSize = tileSize*18;
-			
+
+			var HEADER;
+			var DICE;
+			var STARS;
+			var PLAYER;
+			var COMPUTER;
+			var MINIGAMES;
+			var TILES;
+			var firework;
+			var MiniGame;
+
+
 			var Dist = function(x1, y1, x2, y2) {
 				return sqrt(sq(x1-x2)+sq(y1-y2));
 			};
@@ -354,6 +363,7 @@ var sketchProc = function(processingInstance) {
 				}
 			};
 
+			//FOR MAIN GAME
 			var drawPlayerImg = function(){
 				drawBlob(0, 200, 150);
 				images.push(get(0, 0, width, height));
@@ -362,40 +372,28 @@ var sketchProc = function(processingInstance) {
 				drawBlob(244, 66, 110);
 				images.push(get(0, 0, width, height));
 			};
-			var drawWall2 = function(){
-				fill(230, 134, 0);
-				background(0,1,12);
-				rect(5,8,180,120);
-				rect(210,8,180, 120);
-				
-				rect(0, 136, 90, 125);
-				rect(105, 136, 180, 125);
-				rect(305, 136, 90, 125);
-				
-				rect(5,268,180,120);
-				rect(210,268,180, 120);
-				
+			var drawFinish2 = function(){
+				background(125, 125, 125);
+				fill(0,0,0);
+				noStroke();
+				rect(0,0,100,100);
+				rect(100,100,100,100);
+				rect(200,0,100,100);
+				rect(300,100,100,100);
+				rect(0,200,100,100);
+				rect(100,300,100,100);
+				rect(200,200,100,100);
+				rect(300,300,100,100);
 				images.push(get(0,0,400,400));
-				
 			};
-			var drawWall3 = function(){
-				fill(230, 134, 0);
-				
-				background(0,1,12);
-				rect(0, 8, 90, 120);
-				rect(105, 8, 180, 120);
-				rect(305, 8, 90, 120);
-				
-				rect(5,136,180,125);
-				rect(210,136,180, 125);
-				
-				
-				rect(0, 268, 90, 120);
-				rect(105, 268, 180, 120);
-				rect(305, 268, 90, 120);
-				
+			var drawTileCircle3 = function(){
+				background(0,0,0,0);
+				for(var i = 0; i < 380; i++){
+					noStroke();
+					fill(163-i/2, 201-i/2, 255-i/5);
+					ellipse(200, 200, 380-i, 380-i);
+				}
 				images.push(get(0,0,400,400));
-				
 			};
 			var drawBlock4 = function(){
 				background(0,0,0,0);
@@ -1046,8 +1044,8 @@ var sketchProc = function(processingInstance) {
 
 				images.push(get(0,0,400,200));
 				popMatrix();
-			};
-			var drawTile8 = function(){
+			};		
+			var drawStartTile8 = function(){
 				fill(240, 237, 201);
 				stroke(0,0,0);
 				strokeWeight(2);
@@ -1113,106 +1111,1714 @@ var sketchProc = function(processingInstance) {
 				   
 				images.push(get(0,0,400,400));
 			};
-			var drawFinish9 = function(){
-				background(125, 125, 125);
-				fill(0,0,0);
+			var drawMiniGameTile9 = function(){
+				background(0,0,0, 0);
 				noStroke();
-				rect(0,0,100,100);
-				rect(100,100,100,100);
-				rect(200,0,100,100);
-				rect(300,100,100,100);
-				rect(0,200,100,100);
-				rect(100,300,100,100);
-				rect(200,200,100,100);
-				rect(300,300,100,100);
-				images.push(get(0,0,400,400));
-			};
-			var drawTileCircle10 = function(){
-				background(0,0,0,0);
-				for(var i = 0; i < 380; i++){
-					noStroke();
-					fill(163-i/2, 201-i/2, 255-i/5);
-					ellipse(200, 200, 380-i, 380-i);
+				var dr = (255-200)/50;
+				var dg =(251-100)/50;
+				var db = 0;
+				for (var h = 0; h < 100; h++){
+					fill(200+dr*h, 100+dg*h, db*h);
+					rect(10+h/2, 10+h/2, 380-h,100-h, 30);
 				}
-				images.push(get(0,0,400,400));
-			};
-
-			//FIREWORKS STUFF			
-			var explosionObj = function(a) {
-				this.position = new PVector(0, 0);
-				this.direction = new PVector(0, 0);
-				this.size = random(1, 3)*2;
-				if (a === 0) {
-					this.c1 = random(0, 250);
-				}
-				else {
-					this.c1 = random(100, 255);
-				}
-				if (a === 1) {
-					this.c2 = random(0, 250);
-				}
-				else {
-					this.c2 = random(100, 255);
-				}
-				if (a === 3) {
-					this.c3 = random(0, 250);
-				}
-				else {
-					this.c3 = random(100, 255);
-				}
-				this.timer = 0;
-			};    
-			var fireworkObj = function(a, x, y) {
-				this.position = new PVector(200, 380);
-				this.direction = new PVector(0, 0);
-				this.target = new PVector(x, y);
-				this.step = 0;
-				this.explosions = [];
-				for (var i = 0; i < 150; i++) {
-					this.explosions.push(new explosionObj(a));   
-				}    
-			};    
-			var firework = [];
-			fireworkObj.prototype.draw = function() {
-				fill(255, 255, 255);
-				noStroke();
-				ellipse(this.position.x, this.position.y, 2, 2);
 				
-				this.position.add(this.direction);
-				if (Dist(this.position.x, this.position.y, this.target.x, this.target.y) < 4) {
-					this.step = 2;
-					for (var i = 0; i < this.explosions.length; i++) {
-						this.explosions[i].position.set(this.target.x, this.target.y);
-						
-						this.explosions[i].direction.set(radians(random(0, 360)), random(-1, 3));
-						this.explosions[i].timer = 360;
+				images.push(get(0,0,400,120));
+			};
+
+
+			var starObj= function(){
+				this.r = floor(random(0, 300));
+				this.speed = random(0.001, 2);
+				this.x = 200;
+				this.y = 200;
+				this.angle = random(0, 2*PI);
+			};
+			starObj.prototype.move = function(){
+				this.r += this.speed;
+				this.x = 200+this.r*cos(this.angle);
+				this.y = 200+this.r*sin(this.angle);
+				
+				if (this.y > 400 || this.y < 0 || this. x > 400 || this.x < 0 ){
+					this.r = 0;
+				}
+				
+			};
+			starObj.prototype.draw = function(){
+				ellipse(this.x, this.y, 5, 5);
+			};
+
+			//--------------FOR PIG MINI GAME--------------
+			var MiniGameMode = 0;
+			var pigImages = [];
+			var pigTileSize = 40;
+			var pigGameMap = [ "wwwwwwwwww",
+							"wp---w---w",
+							"wwww-www-w",
+							"w--------w",
+							"w-wwww-w-w",
+							"w------w-w",
+							"www-wwww-w",
+							"w---w----w",
+							"w-wwwwww-w",
+							"w--------w",
+							"wwwwwwwwww"];
+
+			var PIG_WALLS = [];
+			var PIG;
+			var PIG_GLASSES;
+
+
+			var drawPig0 = function(){
+				background(0,0,0,0);
+				var pig = [];
+				
+				fill(250, 181, 255);
+				{
+					pig = [];
+					pig.push(new PVector(200, 90));
+					pig.push(new PVector(130, 100));
+					pig.push(new PVector(90, 130));
+					pig.push(new PVector(70, 180));
+					pig.push(new PVector(70, 240));
+					pig.push(new PVector(90, 280));
+					pig.push(new PVector(130, 310));
+					pig.push(new PVector(200, 320));
+					pig.push(new PVector(270, 310));
+					pig.push(new PVector(310, 280));
+					pig.push(new PVector(330, 240));
+					pig.push(new PVector(330, 180));
+					pig.push(new PVector(310, 130));
+					pig.push(new PVector(270, 100));
+					pig.push(new PVector(200, 90));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+				}
+				
+				fill(250, 181, 255);
+				{
+					pig = [];
+					pig.push(new PVector(271, 110));
+					pig.push(new PVector(271, 110));
+					pig.push(new PVector(288, 75));
+					pig.push(new PVector(318, 54));
+					pig.push(new PVector(309, 84));
+					pig.push(new PVector(297, 132));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+					
+					
+					
+					
+					fill(157, 93, 163);
+					pig = [];
+					pig.push(new PVector(316, 64));
+					pig.push(new PVector(309, 135));
+					pig.push(new PVector(292, 126));
+					
+					//pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+				}
+				
+				fill(250, 181, 255);
+				{
+					pig = [];
+					pig.push(new PVector(133, 109));
+					pig.push(new PVector(133, 109));
+					pig.push(new PVector(119, 68));
+					pig.push(new PVector(85, 62));
+					pig.push(new PVector(85, 62));
+					pig.push(new PVector(115, 112));
+					pig.push(new PVector(110, 122));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+					
+					
+					fill(157, 93, 163);
+					pig = [];
+					pig.push(new PVector(85, 64));
+					pig.push(new PVector(104, 128));
+					pig.push(new PVector(118, 118));
+					pig.push(new PVector(104, 94));
+					
+					//pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+				}
+				
+				fill(188, 104, 196);
+				{
+					pig = [];
+					pig.push(new PVector(200, 210));
+					pig.push(new PVector(175, 215));
+					pig.push(new PVector(160, 240));
+					pig.push(new PVector(175, 265));
+					pig.push(new PVector(200, 270));
+					pig.push(new PVector(225, 265));
+					pig.push(new PVector(240, 240));
+					pig.push(new PVector(225, 215));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+				}
+				
+				fill(250, 181, 255);
+				{
+					pig = [];
+					pig.push(new PVector(180, 230));
+					pig.push(new PVector(170, 240));
+					pig.push(new PVector(180, 250));
+					pig.push(new PVector(190, 240));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+					
+					pig = [];
+					pig.push(new PVector(180, 230));
+					pig.push(new PVector(170, 240));
+					pig.push(new PVector(180, 250));
+					pig.push(new PVector(190, 240));
+					
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x+40, pig[i].y);   
+					}    
+					vertex(pig[0].x+40, pig[0].y);
+					endShape();
+				}   
+				
+				fill(255,255,255);
+				{
+					pig = [];
+					pig.push(new PVector(156, 220));
+					pig.push(new PVector(128, 197));
+					pig.push(new PVector(131, 167));
+					pig.push(new PVector(150, 147));
+					pig.push(new PVector(167, 166));
+					pig.push(new PVector(171, 200));
+					
+					pig = subdivide(pig);
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+					
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x+100, pig[i].y);   
+					}    
+					vertex(pig[0].x+100, pig[0].y);
+					endShape();
+				}
+				
+				fill(0,0,0);
+				{
+					pig = [];
+					pig.push(new PVector(155, 200));
+					pig.push(new PVector(135, 197));
+					pig.push(new PVector(140, 167));
+					pig.push(new PVector(150, 157));
+					pig.push(new PVector(160, 166));
+					pig.push(new PVector(160, 190));
+					
+					pig = subdivide(pig);
+					pig = subdivide(pig);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x, pig[i].y);   
+					}    
+					vertex(pig[0].x, pig[0].y);
+					endShape();
+					
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < pig.length; i++) {
+						vertex(pig[i].x+100, pig[i].y);   
+					}    
+					vertex(pig[0].x+100, pig[0].y);
+					endShape();
+				}
+				
+				noFill();
+				strokeWeight(8);
+				arc(200, 260, 150, 60, radians(10), radians(170));
+				
+				
+				pigImages.push(get(0,0,400,400));
+			};
+			var drawSunglasses1 = function(){
+				background(0,0,0,0);
+				var glasses = [];
+				fill(50, 160, 250);
+				{   
+					glasses = [];
+					glasses.push(new PVector(113, 156));
+					glasses.push(new PVector(77, 164));
+					glasses.push(new PVector(72, 185));
+					glasses.push(new PVector(121, 166));
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < glasses.length; i++) {
+						vertex(glasses[i].x, glasses[i].y);   
+					}    
+					vertex(glasses[0].x, glasses[0].y);
+					endShape();
+					
+							
+					glasses = [];
+					glasses.push(new PVector(200+200-130, 153));
+					glasses.push(new PVector(200+200-77, 164));
+					glasses.push(new PVector(200+200-72, 185));
+					glasses.push(new PVector(200+200-121, 166));
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < glasses.length; i++) {
+						vertex(glasses[i].x, glasses[i].y);   
+					}    
+					vertex(glasses[0].x, glasses[0].y);
+					endShape();
+					
+					glasses = [];
+					glasses.push(new PVector(115, 145));
+					glasses.push(new PVector(115, 145));
+					glasses.push(new PVector(281, 145));
+					glasses.push(new PVector(281, 145));
+					glasses.push(new PVector(286, 218));
+					glasses.push(new PVector(224, 218));
+					glasses.push(new PVector(221, 165));
+					glasses.push(new PVector(176, 165));
+					glasses.push(new PVector(178, 216));
+					glasses.push(new PVector(115, 218));
+					glasses = subdivide(glasses);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < glasses.length; i++) {
+						vertex(glasses[i].x, glasses[i].y);   
+					}    
+					vertex(glasses[0].x, glasses[0].y);
+					endShape();
+					
+				}
+
+				fill(181, 181, 181);
+				{
+					glasses = [];
+					glasses.push(new PVector(125, 155));
+					glasses.push(new PVector(125, 155));
+					glasses.push(new PVector(126, 205));
+					glasses.push(new PVector(166, 205));
+					glasses.push(new PVector(166, 155));
+					glasses.push(new PVector(166, 155));
+					glasses = subdivide(glasses);
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < glasses.length; i++) {
+						vertex(glasses[i].x, glasses[i].y);   
+					}    
+					vertex(glasses[0].x, glasses[0].y);
+					endShape();
+					
+					stroke(0,0,0);
+					strokeWeight(2);
+					beginShape();
+					for (var i = 0; i < glasses.length; i++) {
+						vertex(glasses[i].x+106, glasses[i].y);   
+					}    
+					vertex(glasses[0].x+106, glasses[0].y);
+					endShape();
+				}
+				
+				
+				pigImages.push(get(0,0,400,400));
+			};
+			var drawWall2 = function(){
+				fill(230, 134, 0);
+				background(0,1,12);
+				rect(5,8,180,120);
+				rect(210,8,180, 120);
+				
+				rect(0, 136, 90, 125);
+				rect(105, 136, 180, 125);
+				rect(305, 136, 90, 125);
+				
+				rect(5,268,180,120);
+				rect(210,268,180, 120);
+				
+				pigImages.push(get(0,0,width,height));
+				
+			};
+			var drawWall3 = function(){
+				fill(230, 134, 0);
+				
+				background(0,1,12);
+				rect(0, 8, 90, 120);
+				rect(105, 8, 180, 120);
+				rect(305, 8, 90, 120);
+				
+				rect(5,136,180,125);
+				rect(210,136,180, 125);
+				
+				
+				rect(0, 268, 90, 120);
+				rect(105, 268, 180, 120);
+				rect(305, 268, 90, 120);
+				
+				pigImages.push(get(0,0,width,height));
+				
+			};
+
+			var wallObj = function(x, y){
+				this.x = x;
+				this.y = y;
+				this.size = pigTileSize;
+			};
+			wallObj.prototype.draw = function(){
+				if (this.y % 2 === 0){
+					image(pigImages[2], this.x*pigTileSize, this.y*pigTileSize, this.size, this.size);
+				}
+				else {
+					image(pigImages[3], this.x*pigTileSize, this.y*pigTileSize, this.size, this.size);
+				}
+			};
+
+			var pigObj = function(x, y){
+				this.size = pigTileSize+10;
+				this.x = x;
+				this.y = y;
+				this.drawX = this.x*pigTileSize;
+				this.drawY = this.y*pigTileSize;
+				this.path = [];
+				this.speed = 1;
+				this.pathLength = 0;
+			};
+			pigObj.prototype.draw = function(){
+				image(pigImages[0], this.drawX-5, this.drawY-5, this.size, this.size);
+			};
+			pigObj.prototype.move = function(){
+				if (this.path.length > 0){
+					var IDX = this.path.length-1;
+					while(this.path[IDX] === null){
+						this.path.splice(IDX, 1);
+						IDX = this.path.length-1;
 					}
-				}    
+					
+					
+					var dx = (this.path[IDX].x*pigTileSize > this.drawX) ? this.speed: (this.path[IDX].x*pigTileSize < this.drawX) ? -this.speed: 0;
+					
+					var dy = (this.path[IDX].y*pigTileSize > this.drawY) ? this.speed: (this.path[IDX].y*pigTileSize < this.drawY) ? -this.speed: 0;
+					
+					if (abs(dx) > abs(this.path[IDX].x*pigTileSize - this.drawX)){
+						dx = abs(this.path[IDX].x*pigTileSize - this.drawX)*this.speed/dx;
+					}
+					if (abs(dy) > abs(this.path[IDX].y*pigTileSize - this.drawY)){
+						dy = abs(this.path[IDX].y*pigTileSize - this.drawY)*this.speed/dy;
+					}
+					
+					
+					this.drawX += dx;
+					this.drawY += dy;
+					
+					if (dx === 0 && dy === 0){
+						this.x = this.path[IDX].x;
+						this.y = this.path[IDX].y;
+						this.path.splice(IDX, 1);
+					}
+					
+				}
 			};
-			explosionObj.prototype.draw = function() {
-				fill(this.c1, this.c2, this.c3, this.timer*2);	// 4th value fader
+
+			var glassesObj = function(){
+				this.x = floor(random(0, pigGameMap[0].length));
+				this.y = floor(pigGameMap.length*random(0.5, 1));
+				this.size = pigTileSize+10;
+				while(pigGameMap[this.y].charAt(this.x) === "w"){
+					this.x = floor(random(0, pigGameMap[0].length));
+					this.y = floor(pigGameMap.length*random(0.5, 1));
+				}
+			};
+			glassesObj.prototype.draw = function() {
+				image(pigImages[1], this.x*pigTileSize-5, this.y*pigTileSize-5, this.size, this.size);
+			};
+			PIG_GLASSES = new glassesObj();
+
+			var PigMapObj = function(){
+				var row = 0;
+				var col = 0;
+				this.lastUp = 0;
+				this.time = 0;
+				for (row = 0; row < pigGameMap.length; row++){
+					for (col = 0; col < pigGameMap[row].length; col++){
+						switch(pigGameMap[row].charAt(col)){
+							case "w": 
+								PIG_WALLS.push(new wallObj(col, row));
+							break;
+							case "p": 
+								PIG = new pigObj(col, row);
+							break;
+						}
+					} 
+				}
+				PIG_GLASSES = new glassesObj();
+			};
+			PigMapObj.prototype.draw = function() {
+				pushMatrix();
+				translate(0, -pigTileSize);
+				background(0,0,0);
+				for(var w = 0; w < PIG_WALLS.length; w++){
+					PIG_WALLS[w].draw(); 
+				}
+				
+				PIG.move();
+				PIG.draw();
+				PIG_GLASSES.draw();
+				popMatrix();
+			};
+			PigMapObj.prototype.play = function(){
+				if(PIG.path.length > 0){
+					if (this.lastUp === 1 && keyArray[UP] === 0){
+						PIG.speed += 0.2;
+					}
+				}
+				this.lastUp = keyArray[UP];
+				if (PIG.x === PIG_GLASSES.x && PIG.y === PIG_GLASSES.y){
+					MiniGameMode = 2;  
+					this.computerTime = PIG.pathLength*12 + floor(random(90, 130));
+				}
+				else {
+					this.time++;
+				}
+			};
+			var PIG_MAP = new PigMapObj();
+
+			var NodeObj = function(x, y){
+				this.x = x;
+				this.y = y;
+				this.Neighbors = [];
+				this.g = 1000000000;
+				this.f = 1000000000;
+				this.cameFrom = null;
+			};
+			NodeObj.prototype.findNeighbors = function(){
+				this.Neighbors = [];
+				if (pigGameMap[this.y].charAt(this.x+1) !== "w" ){
+					this.Neighbors.push(new NodeObj(this.x+1, this.y)); 
+				}
+				if (pigGameMap[this.y].charAt(this.x-1) !== "w" ){
+					this.Neighbors.push(new NodeObj(this.x-1, this.y)); 
+				}
+				if (pigGameMap[this.y+1].charAt(this.x) !== "w" ){
+					this.Neighbors.push(new NodeObj(this.x, this.y+1)); 
+				}
+				if (pigGameMap[this.y-1].charAt(this.x) !== "w" ){
+					this.Neighbors.push(new NodeObj(this.x, this.y-1)); 
+				}
+			};
+			var reconstructedPath = function(cameFrom, current){
+				var totalPath = [];
+				totalPath.push(current);
+				while(current !== null){
+					current = current.cameFrom;
+					totalPath.push(current);
+				}
+				return totalPath;
+			};
+			var AStar = function(startX, startY, endX, endY){
+				// The set of nodes already evaluated
+				var closedSet = [];
+
+				// The set of currently discovered nodes that are not evaluated yet.
+				// Initially, only the start node is known.
+				var start = new NodeObj(startX, startY);
+				start.g = 0;
+				start.f = dist(startX, startY, endX, endY);
+				start.cameFrom = null;
+				var openSet = [start];
+				
+				// For each node, which node it can most efficiently be reached from.
+				// If a node can be reached from many nodes, cameFrom will eventually contain the
+				// most efficient previous step.
+				var cameFrom = {};
+				
+				while(openSet.length !== 0){
+					var current = openSet[0];
+					var currIdx = 0;
+					for(var v = 0; v < openSet.length; v++){
+						if (openSet[v].f < current.f){
+							current = openSet[v];
+							currIdx = v;
+						}
+					}
+					
+					if (current.x === endX && current.y === endY){
+						return reconstructedPath(cameFrom, current);
+					}
+					
+					openSet.splice(currIdx, 1);
+					closedSet.push(current);
+					
+					current.findNeighbors();
+					for(var n = 0; n < current.Neighbors.length; n++){
+						var neighbor = current.Neighbors[n];
+						var inClosedSet = false;
+						for(var c = 0; c < closedSet.length; c++){
+							if (neighbor.x === closedSet[c].x && neighbor.y === closedSet[c].y){
+								inClosedSet = true;
+							}
+						} 
+						var inOpenSet = false;
+						for(var c = 0; c < openSet.length; c++){
+							if (neighbor.x === openSet[c].x && neighbor.y === openSet[c].y){
+								inOpenSet = true;
+							}
+						} 
+						var skip = false;
+						if (!inClosedSet){
+							var tempG = current.g + dist(current.x, current.y, neighbor.x, neighbor.y);
+							if (!inOpenSet){
+								openSet.push(neighbor);
+							}
+							else if(tempG >= neighbor.g ){
+								skip = true;
+							}
+							
+							if (!skip){
+								current.Neighbors[n].cameFrom = current;
+								current.Neighbors[n].g = tempG;
+								current.Neighbors[n].f = tempG + dist(neighbor.x, neighbor.y, endX, endY);
+							}
+						}
+					}
+				}
+			};
+			//---------------------------------------------------
+
+			//---------FOR COPS AND ROBBERS GAME--------------
+			var copDifficulty = 3;
+			var copImages = [];
+			var copTileSize = 40;
+
+			var copGameMap=["wwwwwwwwww",
+											"w---wr---w",
+											"w-www-wwww",
+											"wr-----r-w",
+											"wwww-wwwww",
+											"w-----r--w",
+											"wrwww-ww-w",
+											"wr-------w",
+											"w-wrwww-ww",
+											"wRw-----rw",
+											"wwwwwwwwww"];
+				
+			var COP_WALLS = [];
+			var COP_REWARDS = [];
+			var COP_POWERUPS = [];
+			var COP_MAP;
+
+			var drawRobber0 = function(){
+				background(22, 138, 36, 0);
 				noStroke();
-				ellipse(this.position.x, this.position.y, this.size, this.size);
-				this.position.x += this.direction.y*cos(this.direction.x);
-				this.position.y += this.direction.y*sin(this.direction.x);
-				this.position.y += (90/(this.timer + 100));    //gravity
-				this.timer--;
+				
+				fill(0,0,0);
+				ellipse(200,100,80,100);
+				rect(185, 140, 30, 40);
+				
+				rect(160, 160, 80, 120, 30);
+				fill(255, 255, 255);
+				
+				fill(0,0,0);
+				stroke(0,0,0);
+				strokeWeight(30);
+				var x1 = 180;
+				var x2 = x1-20;
+				var x3 = x2+10;
+				var y1 = 260;
+				var y2 = y1+50;
+				var y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3-20, y3+8);
+				
+				
+				x1 = 220;
+				x2 = x1+20;
+				x3 = x2+40;
+				y1 = 260;
+				y2 = y1+50;
+				y3 = y2-50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3+20, y3+8);
+				
+				
+				strokeWeight(20);
+				noFill();	
+				x1 = 220;
+				x2 = x1+60;
+				x3 = x2-20;
+				y1 = 180;
+				y2 = y1+10;
+				y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				
+				
+				//stroke(255, 0, 0);
+				strokeWeight(20);
+				noFill();	
+				x1 = 170;
+				x2 = x1-30;
+				x3 = x2-30;
+				y1 = 180;
+				y2 = y1+50;
+				y3 = y2-30;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+
+				noStroke();
+				fill(252, 217, 146);
+				rect(170,80,60,25, 10);
+				rect(180,115,40,20, 10);
+				fill(255, 255, 255);
+				stroke(0,0,0);
+				strokeWeight(1);
+				ellipse(185,92,20,20);
+				ellipse(215,92,20,20);
+				fill(0,0,0);
+				ellipse(185,92,10,10);
+				ellipse(215,92,10,10);
+				strokeWeight(3);
+				line(210,125,190,125);
+				
+				fill(238, 240, 206);
+				triangle(120,180, 80,180,100,210);
+				ellipse(100,240,60,70);
+				fill(47, 110, 2);
+				textSize(60);
+				text("$", 83,260);
+				
+				copImages.push(get(20,20,width-40,height-40));
+				
+			};
+			var drawRobber1 = function(){
+				background(22, 138, 36, 0);
+				noStroke();
+				
+				
+				fill(0,0,0);
+				ellipse(200,100,80,100);
+				rect(185, 140, 30, 40);
+				
+				rect(160, 160, 80, 120, 30);
+				fill(255, 255, 255);
+				
+				fill(0,0,0);
+				stroke(0,0,0);
+				strokeWeight(30);
+				var x1 = 220;
+				var x2 = 240;
+				var x3 = 230;
+				var y1 = 260;
+				var y2 = y1+50;
+				var y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3+20, y3+8);
+				
+				x1 = 180;
+				x2 = x1-20;
+				x3 = x2+10;
+				y1 = 260;
+				y2 = y1+50;
+				y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3-20, y3+8);
+				
+				strokeWeight(20);
+				noFill();	
+				x1 = 170;
+				x2 = x1-30;
+				x3 = x2-30;
+				y1 = 180;
+				y2 = y1+50;
+				y3 = y2-30;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+
+				
+				//stroke(255, 0, 0);
+				strokeWeight(20);
+				noFill();	
+				x1 = 230;
+				x2 = x1+30;
+				x3 = x2+30;
+				y1 = 180;
+				y2 = y1+50;
+				y3 = y2-30;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+
+				noStroke();
+				fill(252, 217, 146);
+				rect(170,80,60,25, 10);
+				rect(180,115,40,20, 10);
+				fill(255, 255, 255);
+				
+				
+				stroke(0,0,0);
+				strokeWeight(1);
+				ellipse(185,92,20,20);
+				ellipse(215,92,20,20);
+				fill(0,0,0);
+				ellipse(185,92,10,10);
+				ellipse(215,92,10,10);
+				strokeWeight(3);
+				line(210,125,190,125);
+				
+				fill(238, 240, 206);
+				triangle(120+190,180, 80+190,180,100+190,210);
+				ellipse(290,240,60,70);
+				fill(47, 110, 2);
+				textSize(60);
+				text("$", 273,260);
+
+				copImages.push(get(20,20,width-40,height-40));
+				
+			};
+			var drawRobber2 = function(){
+				background(22, 138, 36, 0);
+				noStroke();
+				
+				
+				fill(0,0,0);
+				ellipse(200,100,80,100);
+				rect(185, 140, 30, 40);
+				
+				rect(160, 160, 80, 120, 30);
+				fill(255, 255, 255);
+				
+				
+				fill(0,0,0);
+				stroke(0,0,0);
+				strokeWeight(30);
+				var x1 = 220;
+				var x2 = 240;
+				var x3 = 230;
+				var y1 = 260;
+				var y2 = y1+50;
+				var y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3+20, y3+8);
+				
+				
+				x1 = 180;
+				x2 = 160;
+				x3 = 120;
+				y1 = 260;
+				y2 = y1+50;
+				y3 = y2-50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				line(x3,y3, x3-20, y3+8);
+				
+				
+				strokeWeight(20);
+				noFill();	
+				x1 = 180;
+				x2 = x1-60;
+				x3 = x2+20;
+				y1 = 180;
+				y2 = y1+10;
+				y3 = y2+50;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+				
+				
+				//stroke(255, 0, 0);
+				strokeWeight(20);
+				noFill();	
+				x1 = 230;
+				x2 = x1+30;
+				x3 = x2+30;
+				y1 = 180;
+				y2 = y1+50;
+				y3 = y2-30;
+				line(x1,y1,x2,y2);
+				line(x2,y2,x3,y3);
+
+				noStroke();
+				fill(252, 217, 146);
+				rect(170,80,60,25, 10);
+				rect(180,115,40,20, 10);
+				fill(255, 255, 255);
+				stroke(0,0,0);
+				strokeWeight(1);
+				ellipse(185,92,20,20);
+				ellipse(215,92,20,20);
+				fill(0,0,0);
+				ellipse(185,92,10,10);
+				ellipse(215,92,10,10);
+				strokeWeight(3);
+				line(210,125,190,125);
+				
+				fill(238, 240, 206);
+				triangle(120+190,180, 80+190,180,100+190,210);
+				ellipse(290,240,60,70);
+				fill(47, 110, 2);
+				textSize(60);
+				text("$", 273,260);
+				
+				copImages.push(get(20,20,width-40,height-40));
+			};
+			var drawPolice3 = function(){
+				background(0,0,0,0);
+
+				fill(0, 0, 255);
+				noStroke();
+				rect(10, 10+155*1/2, 300, 155/2, 10);//BODY
+				rect(10+300/2/3, 10, 300*2/3, 155/2+10, 10);//BODY
+				
+				fill(155,155,155);
+				rect(10 + 4*300/6, 10+15, 300/6, 155/2-15, 7); // FRONT WINDOW
+				rect(10 + 4*300/6+10, 10+15, 300/6-10, 155/2-15); // FRONT WINDOW
+				
+				rect(10 + 300/3 + 8, 10+15, 300*1/3-15, 155/2-15, 7); // MIDDLE WINDOW
+				
+				rect(10 + 300/6, 10+15, 300/6, 155/2-15, 7); // BACK WINDOW
+				rect(10 + 300/6, 10+15, 300/6-10, 155/2-15); // BACK WINDOW
+				
+				
+				fill(0 ,0, 0);
+				ellipse(10 + 300/4, 10 + 155, 300/4, 300/4); // WHEELS
+				ellipse(10 + 3*300/4, 10 + 155, 300/4, 300/4); // WHEELS
+				ellipse(10 + 300/2.5, 10+155/1.6, 3, 3); // DOORS
+				
+				fill(130 ,130, 130);
+				ellipse(10 + 300/4, 10 + 155, 300/8, 300/8); // INNER WHEELS
+				ellipse(10 + 300*3/4, 10 + 155, 300/8, 300/8); // INNER WHEELS
+				
+				fill(255,255,0);
+				rect(10 + 5*300/6+10, 10+155/2+4, 300/9, 155/6, 7); // Headlights
+				fill(255,0,0);
+				rect(10 + 300/6 -300/9-10, 10+155/2+4, 300/9, 155/6, 7); // Taillights
+				
+				textSize(40);
+				fill(255,255,255);
+				text("POLICE", 80,130);
+				
+				
+				copImages.push(get(10,0,width-70,height-170));
+			};
+			var drawWall4 = function(){
+				fill(230, 134, 0);
+				background(0,1,12);
+				rect(5,8,180,120);
+				rect(210,8,180, 120);
+				
+				rect(0, 136, 90, 125);
+				rect(105, 136, 180, 125);
+				rect(305, 136, 90, 125);
+				
+				rect(5,268,180,120);
+				rect(210,268,180, 120);
+				
+				copImages.push(get(0,0,width,height));
+				
+			};
+			var drawWall5 = function(){
+				fill(230, 134, 0);
+				
+				background(0,1,12);
+				rect(0, 8, 90, 120);
+				rect(105, 8, 180, 120);
+				rect(305, 8, 90, 120);
+				
+				rect(5,136,180,125);
+				rect(210,136,180, 125);
+				
+				
+				rect(0, 268, 90, 120);
+				rect(105, 268, 180, 120);
+				rect(305, 268, 90, 120);
+				
+				copImages.push(get(0,0,width,height));
+				
+			};
+			var drawReward6 = function(){
+
+				stroke(0,0,0);
+				strokeWeight(15);
+				background(165, 240, 250,0);
+				fill(165, 240, 250);
+				quad(0, 170, 
+						400, 170,
+						400-67, 60,
+						0+67, 60);
+				triangle(400, 170,
+						0, 170,
+						200, 360);
+				line(400-67, 60, 400-133, 170);
+				line(67, 60, 400-266, 170);
+				line(200, 60, 400-266, 170);
+				line(200, 60, 400-133, 170);
+				line(200, 360, 400-266, 170);
+				line(200, 360, 400-133, 170);
+				
+				copImages.push(get(0,0,width,height));
+			};
+			var drawSpeedUp7 = function(){
+				stroke(0,0,0);
+				strokeWeight(15);
+				background(165, 240, 250,0);
+				fill(242, 230, 0);
+				
+				triangle(200, 40, 
+					200, 230,
+					200-100, 200);
+				triangle(200, 400-40, 
+					200+100, 200,
+					200, 170);
+				
+				
+				strokeWeight(18);
+				stroke(242, 230, 0);
+				line(200, 213, 200, 187);
+				
+				copImages.push(get(0,0,width,height));
 			};
 
 
-			//Initialize Objects
-			var WallObj = function(x, y){
+			var drawWall = function(x, y){
+				if (y / 25 % 2 === 0){
+					image(copImages[4], x, y, copTileSize, copTileSize);
+				}
+				else {
+					image(copImages[5], x, y, copTileSize, copTileSize);
+				}
+			};
+
+			var RobberObj = function(x, y, d){
+				//XY is center of figure
+				this.x = (x+0.5)*copTileSize;
+				this.y = (y+0.5)*copTileSize;
+				this.dir = 1;
+				this.state = 1;
+				this.size = d;
+				this.poweredUp = 0;
+				this.speed = 2;
+			};
+			var CopObj = function(x, y, d){
+				this.x = x;
+				this.y = y;
+				this.state = 1;
+				this.dir = 1;//0-up 1-down 2-left 3-right
+				this.size = d;
+			};
+			var COPS = [];
+			var ROBBER;
+
+			var WallCheck = function(x, y, v){
+				var coordX1 = Math.floor((x-v)/copTileSize);//right X value
+				var coordX2 = Math.floor((x+v)/copTileSize);//left X value
+				var coordY1 = Math.floor((y-v)/copTileSize) + 1;//top Y value
+				var coordY2 = Math.floor((y+v)/copTileSize) + 1;//bottom Y value
+
+				if( copGameMap[coordY1].charAt(coordX1) === "w" ||
+				copGameMap[coordY1].charAt(coordX2) === "w" ||
+				copGameMap[coordY2].charAt(coordX1) === "w" ||
+				copGameMap[coordY2].charAt(coordX2) === "w"){
+					return false;
+				}
+
+				return true;
+			};
+
+			RobberObj.prototype.draw = function() {
+				image(copImages[this.dir], this.x-copTileSize/2, this.y-copTileSize/2, copTileSize, copTileSize);
+			};
+			RobberObj.prototype.move = function() {
+				var x = this.x;
+				var y = this.y; 
+
+				if (keyArray[LEFT] === 1) {
+					this.dir = 0;
+					x -= this.speed;
+				}
+				else{
+					if (keyArray[RIGHT] === 1) { 
+						this.dir = 2;
+						x += this.speed;
+					}
+					else{
+						this.dir = 1;
+					}
+				}
+				if (keyArray[UP] === 1) {
+					y -= this.speed;
+				}
+				if (keyArray[DOWN] === 1) { 
+					y += this.speed;
+				}
+				if ( WallCheck(x, y, (copTileSize-10)/2) ){
+					this.x = x;
+					this.y = y;
+				}
+
+			};
+
+			RobberObj.prototype.checkCollisions = function(){
+				var i = 0;
+				//CHECK FOR COLLISION WITH COP
+				for(i = 0; i < COPS.length; i++){
+					if( abs(COPS[i].x - this.x) < 15 && abs(COPS[i].y - this.y) < 15 ){
+						COP_MAP.time += 600;
+						COPS.splice(i, 1);
+						i--;
+					}
+				}
+				
+				for(i = 0; i < COP_REWARDS.length; i++){
+					if(abs((COP_REWARDS[i].x + 0.5)*copTileSize - this.x) < 15 && abs((COP_REWARDS[i].y + 0.5)*copTileSize - this.y) < 15 ){
+						COP_REWARDS.splice(i, 1);
+						i--;
+					}
+				}
+				
+				for(i = 0; i < COP_POWERUPS.length; i++){
+					if(abs((COP_POWERUPS[i].x + 0.5)*copTileSize - this.x) < 15 && abs((COP_POWERUPS[i].y + 0.5)*copTileSize - this.y) < 15 ){
+						COP_POWERUPS.splice(i, 1);
+						i--;
+					}
+				}
+			};
+			CopObj.prototype.draw = function() {
+				image(copImages[3], this.x-copTileSize/2, this.y-copTileSize/2, copTileSize, copTileSize);
+			};
+
+			var findOptions = function(x, y, d){
+				var options = [];
+				var X = Math.floor((x)/copTileSize);
+				var Y = Math.floor((y+copTileSize)/copTileSize);
+				
+				if (  ((x % copTileSize) === ( copTileSize/2 )) && ((y % copTileSize) === ( copTileSize/2 ))  ){
+					switch(d){
+						case 0:
+							if(copGameMap[Y].charAt(X-1) !== "w") {options.push(2);}// left
+							if(copGameMap[Y].charAt(X+1) !== "w") {options.push(3);}// right
+							if(copGameMap[Y-1].charAt(X) !== "w") {options.push(0);}// Keep going up
+							if(options.length === 0 && copGameMap[Y+1].charAt(X) !== "w") 
+			{options.push(1);}//turn around
+							break;
+						case 1:
+							if(copGameMap[Y].charAt(X-1) !== "w") {options.push(2);}// left
+							if(copGameMap[Y].charAt(X+1) !== "w") {options.push(3);}// right
+							if(copGameMap[Y+1].charAt(X) !== "w") {options.push(1);}// Keep going down
+							if(options.length === 0 && copGameMap[Y-1].charAt(X) !== "w") 
+			{options.push(0);}//turn around
+							break;
+						case 2:
+							if(copGameMap[Y-1].charAt(X) !== "w") {options.push(0);}// go up
+							if(copGameMap[Y+1].charAt(X) !== "w") {options.push(1);}//go down
+							if(copGameMap[Y].charAt(X-1) !== "w") {options.push(2);}//keep going
+							if(options.length === 0 && copGameMap[Y].charAt(X+1) !== "w") 
+			{options.push(3);}// turn around
+							break;
+						case 3:
+							if(copGameMap[Y-1].charAt(X) !== "w") {options.push(0);}// go up
+							if(copGameMap[Y+1].charAt(X) !== "w") {options.push(1);}//go down
+							if(copGameMap[Y].charAt(X+1) !== "w") {options.push(3);}//keep going
+							if(options.length === 0 && copGameMap[Y].charAt(X-1) !== "w") 
+			{options.push(2);}// turn around
+							break;
+					}
+				}
+
+
+				return options;
+				
+			};
+			CopObj.prototype.move = function() {
+				var x = this.x;
+				var y = this.y;
+				var posDir = findOptions(x, y, this.dir);
+
+				var nextDir = this.dir;
+				if (posDir.length !== 0) {
+					nextDir = posDir[ Math.floor(random(0,posDir.length)) ];//dir of next turn 
+				}
+
+				y = ( nextDir === 0 ) ? y - 1:
+					( nextDir === 1 ) ? y + 1 : this.y;
+
+				x = ( nextDir === 2 ) ? x - 1 :
+					( nextDir === 3 ) ? x + 1 : this.x;
+
+				this.x = x;
+				this.y = y;
+				this.dir = nextDir; 
+
+			};
+
+
+			var copWallObj = function(x, y){
+				this.x = x;
+				this.y = y;
+				this.size = copTileSize;
+			};
+			copWallObj.prototype.draw = function(){
+				if (this.y % 2 === 0){
+					image(copImages[4], this.x*this.size, this.y*this.size, this.size, this.size);
+				}
+				else {
+					image(copImages[5], this.x*this.size, this.y*this.size, this.size, this.size);
+				}
+			};
+
+			var rewardsObj = function(x, y){
+				this.x = x;
+				this.y = y;
+				this.size = copTileSize;
+			};
+			rewardsObj.prototype.draw = function(){
+				image(copImages[6], this.x*this.size, this.y*this.size, this.size, this.size);
+			};
+
+			var powerUpObj = function(x, y){
+				this.x = x;
+				this.y = y;
+				this.size = copTileSize;
+			};
+			powerUpObj.prototype.draw = function(){
+				image(copImages[7], this.x*this.size, this.y*this.size, this.size, this.size);
+			};
+
+			var copMapObj = function(){
+				this.hasReward = true;
+				this.map = copGameMap;
+				this.time = 0;
+				this.computerTime = 0;
+				this.youDied = 0;
+				this.computerDied = 0;
+				for (var row = 0; row < this.map.length; row++){
+					for (var col = 0; col < this.map[row].length; col++){
+						switch(this.map[row].charAt(col)){
+							case "w": 
+								COP_WALLS.push( new copWallObj(col, row-1) );
+							break;
+							case "r": 
+								COP_REWARDS.push( new rewardsObj(col, row-1) );
+							break;
+							case "p": 
+								COP_POWERUPS.push( new powerUpObj(col, row-1) );
+							break;
+							case "R": 
+								ROBBER = new RobberObj(col, row-1);
+							break;
+							
+						}
+					} 
+				}
+			};
+			copMapObj.prototype.draw = function() {
+				background(22, 138, 36);
+				this.time++;
+				for (var i = 0; i < COP_WALLS.length; i++){    COP_WALLS[i].draw();  }
+				for (var i = 0; i < COP_REWARDS.length; i++){  COP_REWARDS[i].draw();  }
+				for (var i = 0; i < COP_POWERUPS.length; i++){  COP_POWERUPS[i].draw();  }
+				for (var i = 0; i < COPS.length ; i++){	COPS[i].move();	COPS[i].draw();	}
+				
+				ROBBER.move();
+				ROBBER.draw();
+				ROBBER.checkCollisions();
+
+				if(COP_REWARDS.length === 0){  
+					MiniGameMode = 2;  
+					var timeWithOutPenalty = (this.time-600*(3-COPS.length));
+					this.computerTime = timeWithOutPenalty*random(0.8, 1+COPS.length);
+				}
+			};
+			copMapObj.prototype.drawStill = function() {
+				background(22, 138, 36);
+				for (var i = 0; i < COP_WALLS.length; i++){    COP_WALLS[i].draw();  }
+				for (var i = 0; i < COP_REWARDS.length; i++){  COP_REWARDS[i].draw();  }
+				for (var i = 0; i < COP_POWERUPS.length; i++){  COP_POWERUPS[i].draw();  }
+				for(var i = 0; i < COPS.length ; i++){	COPS[i].draw();	}
+				ROBBER.draw();
+			};
+			COP_MAP = new copMapObj();
+
+			var drawBasicBG = function(){
+				noStroke();
+				background(55, 182, 250);
+				fill(22, 138, 36);
+				rect(0,250, 400, 150);
+				var x = 0;
+				var y = 0;
+				for (x = 0; x < 400; x+=copTileSize){    drawWall(x, 250); }
+				for (y = 250; y < 360; y+=Math.floor(copTileSize*2/3)){ 
+					drawWall(0,y);  drawWall(400-copTileSize,y); 
+				}
+				for (x = 0; x < 400; x+=copTileSize){ drawWall(x,360);  }
+			};
+
+			//-----------------------------------------------------------
+
+			//-----------------------PARK IT----------------------------
+			var PARK_CARS = [];
+			var PARK_MAP;
+			var PARK_myH;
+
+			var PARK_myHObj = function(x, y) {
+				this.x = x;
+				this.y = y;
+				this.Speed = 1;
+			};
+			PARK_myHObj.prototype.draw = function() {
+				var Height = 190;
+				var Length = 140;
+				var Width = 40;
+
+				//Draw H
+				fill(100,100,100);
+				noStroke();
+				
+				rect(this.x, this.y+Height/2-Width/2, Length, Width);
+				rect(this.x,this.y, Width, Height);
+				rect(this.x+Length,this.y, Width, Height);
+				
+				//ADD YELLOW LINES to the H
+				stroke(255,255,0);
+				strokeWeight(2);
+				var y = 0;
+				for (y = this.y; y < this.y+Height; y = y + 15){
+					line(this.x+Width/2, y, this.x+Width/2, y+5);
+					line(this.x+Length+Width/2, y, this.x+Length+Width/2, y+5);
+				}
+				var x = 0;
+				for (x = this.x+Width; x < this.x+Length; x = x + 15){
+					line(x, this.y+Height/2, x+5, this.y+Height/2);
+				}
+				
+				noStroke();
+			};
+			PARK_myHObj.prototype.move = function() {
+				if (keyArray[LEFT] === 1) {
+					this.x -= this.Speed;
+				}
+				if (keyArray[RIGHT] === 1) {
+					this.x += this.Speed;
+				}
+			};
+			PARK_myHObj.prototype.drawParking = function(){
+				//PARKING
+				fill(184, 37, 37);
+				rect(this.x-7, 343, 55, 50);
+				rect(this.x+132, 343, 55, 50);
+				textSize(16);
+				fill(255, 255, 0);
+				text("PARK\nHERE", this.x-2, 364);
+				text("PARK\nHERE", this.x+137, 364);
+			};
+
+			var carObj = function(x, y) {
 				this.x = x;
 				this.y = y;
 			};
-			WallObj.prototype.draw = function(){
-				if ((this.y / tileSize) % 2 === 0){
-					image(images[2], this.x, this.y, tileSize, tileSize);
+			carObj.prototype.draw = function() {
+				var w = 40;
+				var h = 25;
+				
+				fill(0, 0, 255);
+				noStroke();
+				rect(this.x, this.y, h/2, w, 5);//BODY
+				rect(this.x, this.y+w/5, h, w/1.8, 5);//BODY
+			   
+				fill(0 ,0, 0);
+				rect(this.x+w/3, this.y+h/3+1, w/4, h/2.7, 3); // FRONT WINDOW
+				rect(this.x+w/3, this.y+2*h/3+3, w/4, h/2.7, 3); // BACK WINDOW
+			   
+				fill(0 ,0, 0);
+				ellipse(this.x, this.y + h-15, w/4, w/4); // WHEELS
+				ellipse(this.x, this.y + h +5, w/4, w/4); // WHEELS
+				
+				fill(130 ,130, 130);
+				ellipse(this.x, this.y + h-15, w/8, w/8); // WHEELS
+				ellipse(this.x, this.y + h +5, w/8, w/8); // WHEELS
+				
+				fill(255,255,0);
+				rect(this.x+w/6, this.y+h*4/3, w/9, h/6, 7); // Headlights
+			};
+			carObj.prototype.move = function(){
+				var inParking = (this.x-PARK_myH.x < 20 && this.x-PARK_myH.x > 0 && this.y >= 340) || (this.x-PARK_myH.x-150 < 20 && this.x-PARK_myH.x-130 > 0 && this.y >= 340);
+				
+				if (inParking){
+					PARK_MAP.Score++;
+					if(PARK_MAP.Score % 3 === 0 && PARK_MAP.Score !== 0){
+						if(PARK_MAP.Speed < 5){
+							PARK_MAP.Speed += 1;
+						}
+						else {
+							if (PARK_CARS.length < 3 ) {
+								var nextY = PARK_MAP.getHighestCar() - 300;
+								if (nextY > -20){
+									nextY = -20;
+								}
+								var temp = new carObj(random(0,100)+250, nextY);
+								PARK_CARS.push(temp);
+							}
+						}
+					}
+					
+					
+					
+					this.y = PARK_MAP.getHighestCar() - 300;
+					this.x = floor(random(0, 100)) + 250;
+					if (this.y > -20){
+						this.y = -20;
+					}
+					
+				} else if (this.y > 340){
+					PARK_MAP.Lives--;
+					if (PARK_MAP.Lives === 0){
+						MiniGameMode = 2;
+					}
+					this.y = PARK_MAP.getHighestCar() - 300;
+					this.x = floor(random(0, 100)) + 250;
+					if (this.y > -20){
+						this.y = -20;
+					}
 				}
 				else {
-					image(images[3], this.x, this.y, tileSize, tileSize);
+					this.y += PARK_MAP.Speed;
 				}
 			};
+
+			var parkMapObj = function(){
+				this.Score = 0;
+				this.Lives = 3;
+				this.Speed = 1;
+			};
+			parkMapObj.prototype.updateInfo = function(){
+				fill(0,0,0);
+				textSize(16);
+				text("Lives:  " + this.Lives, 5, 20);
+				text("Score: " + this.Score, 5, 40); 
+				text("Level:  " + (this.Speed + PARK_CARS.length - 1), 5, 60);  
+			};
+			parkMapObj.prototype.draw = function() {
+				//Fill Background
+				background(123, 228, 235);
+				
+				//Background of road sign
+				rotate(radians(45));
+				fill(255, 218, 117);
+				rect(100,-100, 200, 200,10);
+				rotate(radians(-45));
+				
+				// DRAW STOP LIGHT
+				fill(0,0,0);
+				rect(10,180,60,155, 4);
+				fill(255,0,0);
+				ellipse(40,207,40,40);
+				fill(247, 211, 79);
+				ellipse(40,257,40,40);
+				fill(0,255,0);
+				ellipse(40,307,40,40);
+				
+				//Variables for S Location
+				var X = 85;
+				var Y = 80;
+				var Height = 120;
+				var Length = 110;
+				var Width = 20;
+				
+				//Draw S
+				noFill();
+				strokeWeight(30);
+				stroke(13, 12, 13);
+				bezier(X+Length, Y+Height/4, X+Length, Y-20, X, Y-20, X, Y+Height/4);
+				bezier(X+Length, Y+3*Height/4, X+Length, Y+Height+20, X, Y+Height+20, X, Y+3*Height/4);
+				bezier(X+Length/2, Y+Height/2, X, Y+Height/2, X, Y+Height/3, X, Y+Height/4);
+				bezier(X+Length/2, Y+Height/2, X+Length, Y+Height/2, X+Length, Y+3*Height/4, X+Length, Y+3*Height/4);
+				
+				//Sharpen corners of S
+				noStroke();
+				fill(255, 218, 117);
+				rect(X-Width,Y+2/3*Height-9, 2*Width, 20);
+				rect(X-Width+Length,Y+2.5/10*Height, 2*Width, 20);
+				
+				
+				//DRAW TRAFFIC CONE
+				X = 60;
+				Y = 250;
+				var H = 120;
+				var W = 60;
+				fill(0,0,0);
+				//Base
+				quad(X+W/2, Y+H*7/6, X-W*1/3, Y+H, X+W/2, Y+H*5/6, X+W*4/3, Y+H);
+				fill(255,120,0);
+				//Cone
+				triangle(X+W/2,Y,X,Y+H, X+W, Y+H);
+				arc(X+W/2, Y+H, W, H*1/12, 0, 190);
+				//Curve at top of cone
+				fill(123, 228, 235);
+				rect(X+W/2-10, Y, 20,20);
+				fill(220,100,0);
+				ellipse(X+W/2, Y+21, 10,5);
+				
+				//WHITE STRIPE
+				fill(255,255,255);
+				var topY = H*5/10;
+				var botY = H*7/10;
+				var topX = topY*W/(2*H);
+				var botX = botY*W/(2*H);
+				quad(X+W/2-topX, Y+topY, X+W/2+topX ,Y+topY, X+W/2+botX, Y+botY, X+W/2-botX, Y+botY);
+				arc(X+W/2, Y+botY, 2*botX, H*1/12, 0, 190);
+				fill(255,120,0);
+				arc(X+W/2, Y+topY, 2*topX, H*1/24, 0, 190);
+
+				this.updateInfo();
+			};
+			parkMapObj.prototype.drawBasic = function() {
+				//Fill Background
+				background(123, 228, 235);
+				
+				// DRAW STOP LIGHT
+				fill(0,0,0);
+				rect(10,180,60,155, 4);
+				fill(255,0,0);
+				ellipse(40,207,40,40);
+				fill(247, 211, 79);
+				ellipse(40,257,40,40);
+				fill(0,255,0);
+				ellipse(40,307,40,40);
+				
+				//Variables for S Location
+				var X = 85;
+				var Y = 80;
+				var Height = 120;
+				var Length = 110;
+				var Width = 20;
+				
+				noStroke();
+				
+				//DRAW TRAFFIC CONE
+				X = 260;
+				Y = 250;
+				var H = 120;
+				var W = 60;
+				fill(0,0,0);
+				//Base
+				quad(X+W/2, Y+H*7/6, X-W*1/3, Y+H, X+W/2, Y+H*5/6, X+W*4/3, Y+H);
+				fill(255,120,0);
+				//Cone
+				triangle(X+W/2,Y,X,Y+H, X+W, Y+H);
+				arc(X+W/2, Y+H, W, H*1/12, 0, 190);
+				//Curve at top of cone
+				fill(123, 228, 235);
+				rect(X+W/2-10, Y, 20,20);
+				fill(220,100,0);
+				ellipse(X+W/2, Y+21, 10,5);
+				
+				//WHITE STRIPE
+				fill(255,255,255);
+				var topY = H*5/10;
+				var botY = H*7/10;
+				var topX = topY*W/(2*H);
+				var botX = botY*W/(2*H);
+				quad(X+W/2-topX, Y+topY, X+W/2+topX ,Y+topY, X+W/2+botX, Y+botY, X+W/2-botX, Y+botY);
+				arc(X+W/2, Y+botY, 2*botX, H*1/12, 0, 190);
+				fill(255,120,0);
+				arc(X+W/2, Y+topY, 2*topX, H*1/24, 0, 190);
+			};
+			parkMapObj.prototype.play = function(){
+				PARK_myH.move();
+				PARK_myH.draw();
+				
+				for (var i = 0; i < PARK_CARS.length; i++){
+					PARK_CARS[i].move();
+					PARK_CARS[i].draw();
+				}
+				
+				PARK_myH.drawParking();
+			};
+			parkMapObj.prototype.getHighestCar = function(){
+				var highest = 400;
+				for (var i = 0; i < PARK_CARS.length; i++){
+					if(PARK_CARS[i].y < highest){
+						highest = PARK_CARS[i].y;
+					}
+				}
+				return highest;
+			};
+
+			PARK_MAP = new parkMapObj();
+			PARK_CARS = [];
+			PARK_CARS.push(new carObj(300,-80));
+			PARK_myH = new PARK_myHObj(200, 200);
+
+			//-----------------------------------------------------------
+
+			//----------------------Pyramid game----------------------
+			var LevelObj = function(len, level){
+				this.length = len;
+				this.x = 0;
+				this.y = 180;
+				this.level = level;
+				this.dir = 1*pow(1.5,floor(level/3));
+			};
+			LevelObj.prototype.draw = function() {
+				fill(50,100,255);
+				rect(this.x, this.y, this.length, 50, 2);
+				fill(255, 255, 255);
+				textSize(30);
+				text(this.level, 10, this.y+35);
+			};
+			LevelObj.prototype.move = function() {
+				this.x += this.dir;
+				if (this.x+this.length > 400 || this.x < 0){
+					this.dir *=-1;
+				}
+			};
+			LevelObj.prototype.cut = function(lastBlock) {
+				this.dir = 0;
+				if (lastBlock !== null){
+					//before perfection
+					if(lastBlock.x > this.x){
+						this.length -= (lastBlock.x-this.x);
+						this.x = lastBlock.x;
+					}
+					//after perfection
+					if(this.x > lastBlock.x){
+						this.length -= (this.x-lastBlock.x);
+					}
+					
+					if (this.length < 0){
+						MiniGameMode = 2;
+						this.length = 0;
+					}
+					
+				}
+				
+			};	   
+			LevelObj.prototype.hit = function() {
+				this.hp -= 1;
+				if (this.hp === 0){
+					return true;
+				}
+				else{
+					return false;
+				}
+			};
+
+			var PyramidObj = function(){
+				this.BLOCKS = [];
+				this.lastEnter = 0;
+				this.maxLength = 200;
+				this.BLOCKS.push(new LevelObj(this.maxLength, 0));
+			};
+			PyramidObj.prototype.draw = function() {
+				background(0,0,0);
+				for(var b = 0; b < this.BLOCKS.length; b++){
+					this.BLOCKS[b].draw();
+				}
+			};
+			PyramidObj.prototype.hit = function() {
+				for(var b = 0; b < this.BLOCKS.length; b++){
+					this.BLOCKS[b].move();
+				}
+				
+				if (keyArray[ENTER] === 0 && this.lastEnter === 1){
+					var lastBlock = (this.BLOCKS.length-2 >= 0) ? this.BLOCKS[this.BLOCKS.length-2] : null;
+				   this.BLOCKS[this.BLOCKS.length-1].cut( lastBlock );
+				   this.maxLength = this.BLOCKS[this.BLOCKS.length-1].length;
+
+				   if (MiniGameMode === 1){
+						for (var b = 0 ; b < this.BLOCKS.length ; b++){
+						   this.BLOCKS[b].y+=50;
+						}
+						this.BLOCKS.push(new LevelObj(this.maxLength, this.BLOCKS.length));
+				   }
+				   else {
+					   this.score = this.BLOCKS.length;
+					   this.compScore = floor(random(6, 17));
+					   this.BLOCKS.splice(this.BLOCKS.length-1, 1);
+				   }
+				   
+				}
+				this.lastEnter = keyArray[ENTER];
+			};
+
+			var PYRAMID = new PyramidObj();
+			//-----------------------------------------------------------
 
 			var LogoObj = function(){
 				this.maxSize = 300;
@@ -1256,6 +2862,44 @@ var sketchProc = function(processingInstance) {
 			};
 			var MAP = new MapObj();
 
+			var headerObj = function(){
+				this.y = -100;
+			};
+			headerObj.prototype.draw = function(){
+				fill(0,0,0);
+				stroke(255,255,255);
+				strokeWeight(2);
+				rect(-5,this.y-5,410,70);
+				stroke(255,255,255);
+				strokeWeight(2);
+				ellipse(40,this.y+40,80,80);
+				ellipse(360,this.y+40,80,80);
+				image(images[0], 0, this.y, 80, 80);
+				image(images[1], 320, this.y, 80, 80);
+				fill(255,255,255);
+				textSize(18);
+				text("points: "+ PLAYER.score, 85, this.y+40);
+				text("points: "+ COMPUTER.score, 240, this.y+40);
+			};
+			headerObj.prototype.fadeIn = function(){
+				if (this.y < 0){
+					this.y++;
+					return true;
+				}
+				else {
+					return false;
+				}
+			};
+			headerObj.prototype.fadeOut = function(){
+				if (this.y > -100){
+					this.y--;
+					return true;
+				}
+				else {
+					return false;
+				}
+			};
+
 			var TileObj = function(x, y, n){
 				this.x = x;
 				this.y = y;
@@ -1291,14 +2935,14 @@ var sketchProc = function(processingInstance) {
 				else if (this === TILES[TILES.length-1]){
 					this.x = 1450;
 					this.y = 2200;
-					image(images[9], this.x+90, this.y, 120, 120);
-					image(images[9], this.x-30, this.y, 120, 120);
-					image(images[9], this.x-150, this.y, 120, 120);
-					image(images[9], this.x-210, this.y, 120, 120);
-					image(images[9], this.x+90, this.y+120, 120, 120);
-					image(images[9], this.x-30, this.y+120, 120, 120);
-					image(images[9], this.x-150, this.y+120, 120, 120);
-					image(images[9], this.x-210, this.y+120, 120, 120);
+					image(images[2], this.x+90, this.y, 120, 120);
+					image(images[2], this.x-30, this.y, 120, 120);
+					image(images[2], this.x-150, this.y, 120, 120);
+					image(images[2], this.x-210, this.y, 120, 120);
+					image(images[2], this.x+90, this.y+120, 120, 120);
+					image(images[2], this.x-30, this.y+120, 120, 120);
+					image(images[2], this.x-150, this.y+120, 120, 120);
+					image(images[2], this.x-210, this.y+120, 120, 120);
 					
 					fill(0,0,0);
 					noStroke();
@@ -1313,7 +2957,7 @@ var sketchProc = function(processingInstance) {
 					text("FINISH", this.x-tileSize/2-130, this.y+140);
 				}
 				else{
-					image(images[10], this.x-this.size/2, this.y-this.size/2, this.size, this.size);
+					image(images[3], this.x-this.size/2, this.y-this.size/2, this.size, this.size);
 					
 					textSize(30);
 					fill(0,0,0);
@@ -1327,6 +2971,42 @@ var sketchProc = function(processingInstance) {
 				}
 			};
 
+			var diceObj = function(){
+				this.x = 200;
+				this.y = -200;
+				this.val = 1;
+				this.count = 0;
+			};
+			diceObj.prototype.roll = function(){
+				this.count = (this.count +1)%18;
+				this.val = floor(this.count/3)+1;
+			};
+			diceObj.prototype.draw = function(){
+				image(images[4], this.x - 40, this.y , 80, 80);
+				textSize(50);
+				fill(232, 225, 160);
+				text(this.val, this.x-15, this.y+57);
+			};
+			diceObj.prototype.fadeIn = function(){
+				if (this.y < 100){
+					this.y+=2;
+					return true;
+				}
+				else {
+					return false;
+				}
+			};
+			diceObj.prototype.fadeOut = function(){
+				if (this.y > -100){
+					this.y-=2;
+					return true;
+				}
+				else {
+					return false;
+				}
+			};
+
+
 			var PlayerObj = function(p, x, y, d){
 				//XY is center of figure
 				this.role = p;
@@ -1334,9 +3014,10 @@ var sketchProc = function(processingInstance) {
 				this.y = y;
 				this.size = d;
 				this.tileLoc = 0;
-				this.currLoc = 0;
-				this.state = 0;
+				this.nextTile = 0;
+				this.state = -1;
 				this.score = 0;
+				this.finished = 0;
 				
 				this.angle = 0;
 				
@@ -1347,35 +3028,6 @@ var sketchProc = function(processingInstance) {
 					this.offset = -tileSize/3-10;
 				}
 			};
-
-			var PLAYER = new PlayerObj("human",0,0,tileSize);
-			var COMPUTER = new PlayerObj("computer",0,0,tileSize);
-
-
-			var mouseClicked = function() {
-				if (Mode === 0){
-					//70,310,100,40 start
-					if (mouseX > 70 && mouseX < 170 && mouseY > 310 && mouseY < 350 ){
-						PLAYER.x = 900;
-						PLAYER.y = 2300;
-						PLAYER.size = 140;
-						COMPUTER.x = 1100;
-						COMPUTER.y = 2300;
-						COMPUTER.size = 140;
-						Mode = 1; 
-					}   
-					//220, 310, 150, 60 howto
-					if (mouseX > 220 && mouseX < 220+150 && mouseY > 310 && mouseY < 350 ){
-						Mode = -1;   
-					}
-				}    
-				else if (Mode === -1) {
-					Mode = 0;
-				}
-			};
-			var keyPressed = function() { keyArray[keyCode] = 1;};
-			var keyReleased = function() {keyArray[keyCode] = 0;};
-
 			PlayerObj.prototype.draw = function() {
 				if(this.role === "human"){
 					image(images[0], this.x-this.size/2, this.y-this.size/2, this.size, this.size);
@@ -1421,8 +3073,22 @@ var sketchProc = function(processingInstance) {
 			PlayerObj.prototype.makeMove = function(){
 				centerX = this.x;
 				centerY = this.y-50;
+				DICE.draw();
+				HEADER.draw();
 				switch(this.state){
-					case 0:{//waiting
+					//dice come in
+					case -1:{
+						if (DICE.fadeIn()){
+							HEADER.fadeIn();
+							this.state = -1;
+						}
+						else {
+							this.state = 0;
+						}
+						break;
+					}
+					//waiting
+					case 0:{
 						if(this.tileLoc === TILES.length-1){
 							this.state = 4;
 						}
@@ -1440,81 +3106,82 @@ var sketchProc = function(processingInstance) {
 									this.state = 1;
 								}
 							}
-							image(images[4], 160, 100, 80, 80);
-							textSize(50);
-							text(dice, 185, 157);
 						}
 						break;
 					}
 					case 1:{//rolling
-						dice = (dice + 1) % 6 + 1;
+						var doIt = 0;
+						DICE.roll();
 						if(this.role === "computer"){
 							count++;
 							if (count === CountLimit){
-								this.state = 2;
-								count = 0;
-								this.tileLoc += dice;
-								if (this.tileLoc > TILES.length-1 ){
-									this.tileLoc = TILES.length-1;
-								}
-								this.currLoc++;
+								doIt = 1;
 							}
 						}
 						else {
 							if (keyArray[ENTER] === 1){
-								this.state = 2;
-								this.tileLoc += dice;
-								if (this.tileLoc > TILES.length-1 ){
-									this.tileLoc = TILES.length-1;
-								}
-								this.currLoc++;
+								doIt = 1;
 							}
 						}
-						image(images[4], 160, 100, 80, 80);
-						textSize(50);
-						text(dice, 185, 157);
-						break;
-					}
-					case 2:{//pause
-						image(images[4], 160, 100, 80, 80);
-						textSize(50);
-						text(dice, 185, 157);
-						count++;
-						if(count > 100){ 
-							count = 0; 
-							this.state = 3; 
-							this.dx = TILES[this.currLoc].x - this.x;
-							this.dy = TILES[this.currLoc].y - this.y;
+						if (doIt === 1){
+							this.state = 2;
+							this.nextTile = this.tileLoc+1;
+							this.tileLoc += DICE.val;
+							if (this.tileLoc > TILES.length-1 ){
+								this.tileLoc = TILES.length-1;
+							}
+							if (this.nextTile === this.tileLoc){
+								this.dx = TILES[this.nextTile].x - this.x + this.offset;
+								this.dy = TILES[this.nextTile].y - this.y;
+							}
+							else {
+								this.dx = TILES[this.nextTile].x - this.x;
+								this.dy = TILES[this.nextTile].y - this.y;
+							}
 						}
 						
 						break;
 					}
+					case 2:{//pause
+						if(!DICE.fadeOut()){ 
+							count = 0; 
+							this.state = 3; 
+						}
+						break;
+					}
 					case 3:{//move
+						if (keyArray[ENTER] === 1){
+								this.nextTile = this.tileLoc;
+								this.x = TILES[this.nextTile].x+this.offset;
+								this.y = TILES[this.nextTile].y;
+								this.state = 4;
+								break;
+						}
 						var dist = 0;
-						if (this.currLoc === this.tileLoc){
-							dist = Dist(TILES[this.currLoc].x+this.offset, TILES[this.currLoc].y, this.x, this.y);
+						if (this.nextTile === this.tileLoc){
+							dist = Dist(TILES[this.nextTile].x+this.offset, TILES[this.nextTile].y, this.x, this.y);
 						}
 						else {
-							dist = Dist(TILES[this.currLoc].x, TILES[this.currLoc].y, this.x, this.y);
+							dist = Dist(TILES[this.nextTile].x, TILES[this.nextTile].y, this.x, this.y);
 						}
-						text(dist, 10, 100);
+						
 						if (dist > 10){
 							this.move();
 						}
 						else{
-							if (this.currLoc === this.tileLoc){
+							if (this.nextTile === this.tileLoc){
 								this.state = 4;
 							}
 							else{
-								this.currLoc++;
-								if (this.currLoc === this.tileLoc){
-									this.dx = TILES[this.currLoc].x - this.x + this.offset;
-									this.dy = TILES[this.currLoc].y - this.y;
+								this.nextTile++;
+								if (this.nextTile === this.tileLoc){
+									this.dx = TILES[this.nextTile].x - this.x + this.offset;
+									this.dy = TILES[this.nextTile].y - this.y;
 								}
 								else {
-									this.dx = TILES[this.currLoc].x - this.x;
-									this.dy = TILES[this.currLoc].y - this.y;
-								}
+									this.dx = TILES[this.nextTile].x - this.x;
+									this.dy = TILES[this.nextTile].y - this.y;
+								} 
 							}
 						}
 						break;
@@ -1524,19 +3191,24 @@ var sketchProc = function(processingInstance) {
 						if(count > 100){ 
 							count = 0; 
 							if (this.role === "computer"){
-								Mode = 2;
+								MainGameMode = 4;
 							}
 							else {
-								Mode = 3;
+								MainGameMode = 3;
 							}
-							this.state = 0;
-							this.state = 0;
+							this.state = -1;
 						}
-						if(this.tileLoc === TILES.length-1 && PLAYER.tileLoc === TILES.length-1){
-							Mode = 4;
-							PLAYER.score += 10;
-							COMPUTER.score += 10;
-							this.score -=10;
+						
+						if (this.finished === 0 && this.tileLoc === TILES.length-1){//im just finishing
+							if ( (COMPUTER.tileLoc !== TILES.length-1 && PLAYER.tileLoc === TILES.length-1) || (COMPUTER.tileLoc === TILES.length-1 && PLAYER.tileLoc !== TILES.length-1) ){
+								this.score += 10;
+							}
+							this.finished = 1;
+						}
+						
+						
+						if(COMPUTER.tileLoc === TILES.length-1 && PLAYER.tileLoc === TILES.length-1){
+							MainGameMode = 8;
 						}
 						break;
 					}
@@ -1546,13 +3218,6 @@ var sketchProc = function(processingInstance) {
 			};
 
 			MapObj.prototype.init = function(){
-				for (var row = 0; row < this.map.length; row++){
-					for (var col = 0; col < this.map[row].length; col++){
-						if(this.map[row].charAt(col)==="w"){
-							WALLS.push(new WallObj(col*tileSize,row*tileSize));
-						}
-					} 
-				}
 				var i = 0;
 				for(var an = 110; an < 440; an += 13){
 					var angle = radians(an);
@@ -1588,18 +3253,16 @@ var sketchProc = function(processingInstance) {
 					centerX += (1500)*0.01 + 1.55;
 					centerY += (2445)*0.01 + 5;
 				}
-				else {
+				else {					
 					count++;
-					if (count > 275){
-						Mode = 2;
-						count = 0;
-					}
-					else if (count > 100 && centerX > 900){
+					if (count > 100 && centerX > 900){
 						centerX--;
-						if (centerX < 900){
+						if (centerX <= 900){
 							centerX = 900;
+							MainGameMode = 2;
+							count = 0;
 						}
-					}
+					} 
 				}
 				
 				PLAYER.draw();
@@ -1613,7 +3276,7 @@ var sketchProc = function(processingInstance) {
 				pushMatrix();
 				var transX = 200-centerX;
 				var transY = 200-centerY;
-				translate(transX, transY+20);
+				translate(transX, transY);
 				
 				for(var t = 0; t < TILES.length; t++){
 					TILES[t].draw();
@@ -1629,38 +3292,10 @@ var sketchProc = function(processingInstance) {
 				noStroke();
 				background(0, 0, 0);
 				
-				count++;
-				if (count > 60){
-					shootFireworks = 1;
-					firework.push(new fireworkObj(0, 200, 200));
-					//firework.push(new fireworkObj(1, 200, 200));
-					count = 0;
-				}
 				
-				if (shootFireworks === 1 && PLAYER.size > 150){
-					shootFireworks = 0;
-					for (var j = 0; j < firework.length; j++) {
-						if (firework[j].step === 0) {
-							firework[j].position.set(200, 200);
-							firework[j].direction.set(firework[j].target.x - firework[j].position.x, firework[j].target.y - firework[j].position.y);
-							var s = 2;//random(1, 2) / 100;
-							firework[j].direction.mult(s);
-							firework[j].step++;
-							shootFireworks = 1;
-						} 
-						else if (firework[j].step === 1) {
-							firework[j].draw();
-							shootFireworks = 1;
-						} 
-						else if (firework[j].step === 2) {
-							for (var i = 0; i < firework[j].explosions.length; i++) {
-								firework[j].explosions[i].draw();   
-							} 
-							if (firework[j].explosions[0].timer > 0){
-								shootFireworks = 1;
-							}
-						}
-					}
+				for(var x = 0; x< STARS.length; x++){
+					STARS[x].move();
+					STARS[x].draw();
 				}
 				
 				
@@ -1684,43 +3319,634 @@ var sketchProc = function(processingInstance) {
 					}
 				}
 			};
-			var drawHeader = function(){
-				fill(0,0,0);
-				stroke(255,255,255);
-				strokeWeight(2);
-				rect(-5,-5,410,70);
+
+			var mouseClicked = function() {
+				switch (MainGameMode){
+					//How To Screen
+					case -1:{
+						MainGameMode = 0;
+						break;
+					}
+					//Main menu
+					case 0:{
+						//70,310,100,40 start
+						if (mouseX > 70 && mouseX < 170 && mouseY > 310 && mouseY < 350 ){
+							 PLAYER.x = 900;
+							PLAYER.y = 2300;
+							PLAYER.size = 140;
+							COMPUTER.x = 1100;
+							COMPUTER.y = 2300;
+							COMPUTER.size = 140;
+							MainGameMode = 1; 
+						}   
+						//220, 310, 150, 60 howto
+						if (mouseX > 220 && mouseX < 220+150 && mouseY > 310 && mouseY < 350 ){
+							MainGameMode = -1;   
+						}
+						break;
+					}
+					//PICKING MiniGame
+					case 4:{
+						for(var m = 0; m < MINIGAMES.length; m++){
+							if (MINIGAMES[m].tileWasClicked(mouseX, mouseY)){
+								MiniGame = m;
+								MainGameMode = 5;
+							}
+						}
+						break;
+					}
+					//Playing Minigame
+					case 5:{
+						switch(MiniGame){
+							//MINI GAME 0 : PIG GAME
+							case 0:{
+								switch(MiniGameMode){
+									//Menu
+									case 0:{
+										MiniGameMode = 1;
+										break;
+									}
+									//Find Path to glasses
+									case 1:{
+										var path = AStar(PIG.x, PIG.y, floor(mouseX/pigTileSize), floor(mouseY/pigTileSize)+1);
+										path.splice(path.length-1,1);
+										PIG.path = path;
+										PIG.pathLength = path.length;
+										break;
+									}
+									//Finished playing, add to score
+									case 2:{
+										MiniGameMode = 3;
+										break;
+									}
+								}
+								break;
+							}
+							//MINI GAME 1 : Cops and Robbers
+							case 1:{
+								switch(MiniGameMode){
+									//Menu
+									case 0:{
+										COPS = [];
+										for (var i = 0; i < copDifficulty; i++){
+											COPS.push(new CopObj(copTileSize*3/2, copTileSize/2, copTileSize));
+										}
+										MiniGameMode = 1;
+										break;
+									}
+									//Finished playing, add to score
+									case 2:{
+										MiniGameMode = 3;
+										break;
+									}
+								}
+								break;
+							}
+							//MINIGAME 2: PARK IT
+							case 2:{
+								switch(MiniGameMode){
+									//Menu
+									case 0:{
+										MiniGameMode = 1;
+										break;
+									}
+									//GameOver
+									case 2:{
+										MiniGameMode = 3;
+										break;
+									}
+								}
+								break;
+							}
+							//MINIGAME 3: PYRAMID
+							case 3:{
+								switch(MiniGameMode){
+									//Menu
+									case 0:{
+										MiniGameMode = 1;
+										break;
+									}
+									//GameOver
+									case 2:{
+										MiniGameMode = 3;
+									}
+								}
+								break;
+							}
+							
+							
+							
+						}
+						break;
+					}
+				}
+			};
+			var keyPressed = function() { keyArray[keyCode] = 1;};
+			var keyReleased = function() {keyArray[keyCode] = 0;};
+
+
+			var miniGameObj = function(n, i){
+				this.mode = 0;
+				this.name = n;
+				this.num = i;
+				this.tileY = -100;
+			};
+			miniGameObj.prototype.drawTile = function(choice){
+				this.tileY = 57 + (choice+1)*58;
+								
+				image(images[9], 60, this.tileY, 280, 50);
 				
-				stroke(255,255,255);
-				strokeWeight(2);
-				ellipse(40,40,80,80);
-				ellipse(360,40,80,80);
-				image(images[0], 40-40, 40-40, 80, 80);
-				image(images[1], 360-40, 40-40, 80, 80);
-				fill(255,255,255);
-				textSize(18);
-				text("points: "+ PLAYER.score, 85, 40);
-				text("points: "+ PLAYER.score, 240, 40);
+				fill(0,0,0);
+				textSize(20);
+				text(this.name, 68, this.tileY+32);
+			};
+			miniGameObj.prototype.tileWasClicked = function(x, y){
+				if (  x < 340 && x > 60 && y > this.tileY && y < this.tileY+50 ){
+					return true;
+				}
+				else {
+					return false;
+				}
+			};
+
+
+			var playMiniGame = function(){
+				switch(MiniGame){
+					//MINI GAME 0 : PIG GAME
+					case 0:{
+						switch(MiniGameMode){
+							//MENU
+							case 0: {
+								background(0,0,0);
+								fill(255,255,255);
+								textSize(40);
+								text("Where's my shades?", 10, 60);
+								textSize(14);
+								text("Click Anywhere to Begin Playing", 100, 80);
+								
+								rect(20,100,200,140, 60);
+								ellipse(240, 210, 30, 30);
+								ellipse(270, 240, 20, 20);
+								ellipse(290, 263, 10, 10);
+								
+								
+								image(pigImages[0], 220,230,200,200);
+								image(pigImages[1], 115,85, 60,60);
+								fill(0,0,0);
+								textSize(12);
+								text("       I have lost my shades and\n  need your help finding them. Find \nthem in the maze, click on them and\n   I will go there. Click the UP key \n    repeatedly and I will speed up! \n           Help me find them as \n                fast as you can.", 25, 128);
+								
+								break;
+							}
+							//FINDING
+							case 1: {
+								PIG_MAP.draw();
+								PIG_MAP.play();
+								break;
+							}
+							//GAME COMPLETE
+							case 2: {
+								PIG_MAP.draw();
+								fill(255, 255, 255);
+								rect(20,90, 360, 220, 30);
+								fill(100,100,100);
+								rect(30,100, 340, 200, 30);
+								fill(255, 255, 255);
+								textSize(40);
+								text("FINISHED", 110, 150);
+								textSize(25);
+								var myTime = floor((PIG_MAP.time/60)*100)/100;
+								var CPUTime = floor((PIG_MAP.computerTime/60)*100)/100;
+								text("Your Final Time: "+ myTime +" secs", 50, 200);
+								text("CPU's Final Time: "+ CPUTime +" secs", 40, 230);
+								textSize(40);
+								if (CPUTime > myTime){
+									fill(0, 255, 255);
+									text("You Win", 120, 280);
+								}else if (CPUTime < myTime){
+									fill(255, 0, 0);
+									text("You Lose", 110, 280);
+								}else {
+								   fill(255, 255, 0);
+									text("IT'S A TIE", 110, 280);
+								}
+								
+								
+								fill(0,0,0);
+								textSize(12);
+								text("click anywhere to continue...", 120, 310);
+								break;
+							}
+							//REWARD POINTS
+							case 3: {
+								var myTime = floor((PIG_MAP.time/60)*100)/100;
+								var CPUTime = floor((PIG_MAP.computerTime/60)*100)/100;
+								if (CPUTime > myTime){
+									PLAYER.score += 10;
+								}else if (CPUTime < myTime){
+									COMPUTER.score += 10;
+								}else {
+									//no points rewarded
+								}
+								MiniGameMode = 4;
+								break;
+							}							
+							//Done playing
+							case 4:{
+								MainGameMode = 2;
+								MiniGameMode = 0;
+								PIG_MAP = new PigMapObj();
+								break;
+							}
+						}
+						break;
+					}
+					//MINI GAME 1 : Damond Diggers
+					case 1:{
+						switch(MiniGameMode){
+							//MENU
+							case 0: {
+								drawBasicBG();
+								fill(255,255,255);
+								textSize(50);
+								text("Diamond Digger", 20, 50);
+								textSize(14);
+								text("Click Anywhere to Play...", 130, 80);
+								
+								image(copImages[1], 240, 230, 120,120);
+								image(copImages[6], 51, 3, 20,20);
+								image(copImages[6], 265, 3, 20,20);
+								
+								fill(255, 255, 255);
+								rect(10, 98, 250, 140, 30);
+								fill(0,0,0);
+								text(" Your goal is to help the robber collect \n  all diamonds on the board. Use the \narrow keys to control his movement. If \n  the cops catch the robber, 10 seconds \n will be added to the timer. Collect all \ndiamonds as fast as you can and try to \n           beat the computer's time.  ", 17, 120);
+
+								break;
+							}
+							//PLAYING
+							case 1: {
+								COP_MAP.draw();
+								break;
+							}
+							//GAME COMPLETE
+							case 2: {
+								COP_MAP.drawStill();
+						
+								fill(255, 255, 255);
+								rect(20,90, 360, 220, 30);
+								fill(100,100,100);
+								rect(30,100, 340, 200, 30);
+								fill(255, 255, 255);
+								textSize(40);
+								text("FINISHED", 110, 150);
+								textSize(25);
+								var myTime = floor((COP_MAP.time/60)*100)/100;
+								var CPUTime = floor((COP_MAP.computerTime/60)*100)/100;
+								text("Your Final Time: "+ myTime +" secs", 50, 200);
+								text("CPU's Final Time: "+ CPUTime +" secs", 40, 230);
+								
+								
+								textSize(40);
+								if (CPUTime > myTime){
+									fill(0, 255, 255);
+									text("You Win", 120, 280);
+								}else if (CPUTime < myTime){
+									fill(255, 0, 0);
+									text("You Lose", 110, 280);
+								}else {
+								   fill(255, 255, 0);
+									text("IT'S A TIE", 110, 280);
+								}
+								
+								
+								fill(0,0,0);
+								textSize(12);
+								text("click anywhere to continue...", 120, 310);
+								break;
+							}
+							//REWARD POINTS
+							case 3: {
+								var myTime = floor((COP_MAP.time/60)*100)/100;
+								var CPUTime = floor((COP_MAP.computerTime/60)*100)/100;
+								if (COP_MAP.youDied === 1){
+									myTime = 100000;
+								}
+								if (COP_MAP.computerDied === 1){
+									CPUTime = 100000;
+								}
+								MiniGameMode = 4;
+								
+								if (CPUTime > myTime){
+									PLAYER.score += 10;
+								}else if (CPUTime < myTime){
+									COMPUTER.score += 10;
+								}else {
+									//no points rewarded
+								}
+								
+								MiniGameMode = 4;
+								break;
+							}							
+							//Done playing
+							case 4:{
+								MainGameMode = 2;
+								MiniGameMode = 0;
+								COP_MAP = new copMapObj();
+								break;
+							}
+						}
+						break;
+					}
+					//MINI GAME 2 : Park It
+					case 2:{
+						switch(MiniGameMode){
+							//MENU
+							//Menu
+							case 0:{
+								PARK_MAP.drawBasic();
+								fill(200,200,200);
+								textSize(90);
+								text("PARK IT", 24, 96);
+								fill(100,100,100);
+								text("PARK IT", 27, 93);
+								fill(0,0,0);
+								text("PARK IT", 30, 90);
+								
+								textSize(16);
+								var top = 140;
+								fill(0,0,0);
+								text("How to play:", 100, top);
+								textSize(14);
+								text("Cars will fall from the top of the screen. \nYou must catch them in the parking \ngarage by moving the garage back and \nforth with the arrow keys. Once you miss \n3 cars, the game is over. Try to catch as \nmany as you can. Every time you level \nup, the game will get slightly faster.", 120, top+20);
+								
+								
+								if (mousePressed) {
+									MiniGameMode = 1;
+								}
+								break;
+							}
+							//PLAYGAME
+							case 1: {
+								PARK_MAP.draw();
+								PARK_MAP.play();
+								PARK_MAP.CompScore = floor(random(10, 50));
+								break;
+							}
+							//GAME COMPLETE
+							case 2: {
+								PARK_MAP.draw();
+								fill(255, 255, 255);
+								rect(20,90, 360, 220, 30);
+								fill(100,100,100);
+								rect(30,100, 340, 200, 30);
+								fill(255, 255, 255);
+								textSize(40);
+								text("FINISHED", 110, 150);
+								textSize(25);
+								var myScore = PARK_MAP.Score;
+								var compScore = PARK_MAP.CompScore;
+								text("Your Final Score:   "+ PARK_MAP.Score +" points ", 40, 200);
+								text("CPU's Final Score: "+ PARK_MAP.CompScore +" points ", 40, 230);
+								
+								
+								textSize(40);
+								if (myScore > compScore){
+									fill(0, 255, 255);
+									text("You Win", 120, 280);
+								}else if (myScore < compScore){
+									fill(255, 0, 0);
+									text("You Lose", 110, 280);
+								}else {
+								   fill(255, 255, 0);
+									text("IT'S A TIE", 110, 280);
+								}
+								
+								
+								fill(0,0,0);
+								textSize(12);
+								text("click anywhere to continue...", 120, 310);
+								break;
+							}
+							//REWARD POINTS
+							case 3: {
+								var myScore = PARK_MAP.Score;
+								var compScore = PARK_MAP.CompScore;								
+								
+								textSize(40);
+								if (myScore > compScore){
+									PLAYER.score += 10;
+								}else if (myScore < compScore){
+									COMPUTER.score += 10;
+								}else {
+								}
+																
+								MiniGameMode = 4;
+								break;
+							}							
+							//Done playing
+							case 4:{
+								MainGameMode = 2;
+								MiniGameMode = 0;
+								PARK_MAP = new parkMapObj();
+								PARK_CARS = [];
+								PARK_CARS.push(new carObj(300,-80));
+								PARK_myH = new PARK_myHObj(200, 200);
+								break;
+							}
+						}
+						break;
+					}
+					//MINI GAME 3 : Pyramid
+					case 3:{
+						switch(MiniGameMode){
+							//MENU
+							case 0:{
+								noStroke();
+								background(0,0,0);
+								var y = 80;
+								fill(100, 180, 255);
+								rect(145+50, y, 80, 50, 10);
+								fill(80, 160, 255);
+								rect(145+50, y+50, 124, 50, 10);
+								fill(60, 140, 255);
+								rect(140+50, y+100, 132, 50, 10);
+								fill(40, 120, 255);
+								rect(120+50, y+150, 154, 50, 10);
+								fill(20, 100, 255);
+								rect(120+50, y+200, 190, 50, 10);
+								fill(0, 80, 255);
+								rect(90+50, y+250, 220, 50, 10);
+								
+								textSize(57);
+								fill(100, 180, 255);
+								text("Pyramid", 94, 56);
+								fill(60, 140, 255);
+								text("Pyramid", 97, 53);
+								fill(20, 100, 255);
+								text("Pyramid", 100, 50);
+								fill(255, 255, 255);
+								textSize(14);
+								text("Try to stack the blocks as \nhigh as possible. To stop a \nblock, click 'ENTER'. When \nit is stopped, only the parts \nof the block on top of \nprevious block will stay valid. \nBe careful, the blocks will \nspeed up.\n", 10, 100);
+								break;
+							}
+							//PLAYING
+							case 1: {
+								PYRAMID.draw();
+								PYRAMID.hit();
+								break;
+							}
+							//DONE
+							case 2: {
+								PYRAMID.draw();
+								fill(255, 255, 255);
+								rect(20,90, 360, 220, 30);
+								fill(100,100,100);
+								rect(30,100, 340, 200, 30);
+								fill(255, 255, 255);
+								textSize(40);
+								text("FINISHED", 110, 150);
+								textSize(25);
+								var myScore = PYRAMID.score;
+								var compScore = PYRAMID.compScore;
+								text("Your Final Score:   "+ myScore +" points ", 40, 200);
+								text("CPU's Final Score: "+ compScore +" points ", 40, 230);
+								
+								
+								textSize(40);
+								if (myScore > compScore){
+									fill(0, 255, 255);
+									text("You Win", 120, 280);
+								}else if (myScore < compScore){
+									fill(255, 0, 0);
+									text("You Lose", 110, 280);
+								}else {
+								   fill(255, 255, 0);
+									text("IT'S A TIE", 110, 280);
+								}
+								
+								fill(0,0,0);
+								textSize(12);
+								text("click anywhere to continue...", 120, 310);
+								break;
+							}
+							//REWARD POINTS
+							case 3: {
+								var myScore = PYRAMID.score;
+								var compScore = PYRAMID.compScore;							
+								
+								textSize(40);
+								if (myScore > compScore){
+									PLAYER.score += 10;
+								}else if (myScore < compScore){
+									COMPUTER.score += 10;
+								}else {
+								}
+																
+								MiniGameMode = 4;
+								break;
+							}							
+							//Done playing
+							case 4:{
+								MainGameMode = 2;
+								MiniGameMode = 0;
+								PYRAMID = new PyramidObj();
+								break;
+							}
+							
+							
+						}
+
+						
+						break;
+					}
+				}
+				
+			};
+			var pickMiniGame = function(){
+				background(0,0,0);
+				
+				
+				fill(100,100,100);
+				rect(50,50, 300, 300, 30);
+				for(var m = 0; m < MINIGAMES.length; m++){
+					MINIGAMES[m].drawTile(m);
+				}
+				
+				textSize(45);
+				fill(200, 100, 0);
+				text("MINI GAMES", 65-4, 100+4);
+				fill(220, 155, 0);
+				text("MINI GAMES", 65-2, 100+2);
+				fill(255, 251, 0);
+				text("MINI GAMES", 65, 100);
 				
 			};
 
+
+
+			var debugging = function(){
+				//text(mouseX+", "+mouseY, 10, 100);
+				//console.log(PLAYER.state + ", " + COMPUTER.state);
+			};
+
+
+			firework = [];
+			TILES = [];
+			PLAYER = new PlayerObj("human",0,0,tileSize);
+			COMPUTER = new PlayerObj("computer",0,0,tileSize);
+			DICE = new diceObj();
+			HEADER = new headerObj();
+			STARS = [];
+			for(var x = 0; x< 200; x++){
+				STARS.push(new starObj());
+			}
+			MiniGame = -1;
+			MINIGAMES = [];
+			MINIGAMES.push(new miniGameObj("        Where's my shades?        ", 0));
+			MINIGAMES.push(new miniGameObj("           Diamond Digger           ", 1));
+			MINIGAMES.push(new miniGameObj("                 Park It                   ", 2));
+			MINIGAMES.push(new miniGameObj("                Pyramid                  ", 3));
+
+			var showImages = function(){
+				for (var i = 0; i < images.length; i++){
+					image(images[i], (i*100)%400, floor((i*100)/400)*100,100, 100);
+				}
+			};
+
 			var draw = function() {
-				switch(Mode){
+				switch(MainGameMode){
 					//Make characters
 					case -2: {
 						drawPlayerImg();
 						drawComputerImg();
-						drawWall2();
-						drawWall3();
+						drawFinish2();
+						drawTileCircle3();
 						drawBlock4();
 						drawLogo5();
 						drawStart6();
 						drawHT7();
-						drawTile8();
-						drawFinish9();
-						drawTileCircle10();
+						drawStartTile8();
+						drawMiniGameTile9();
 						MAP.init();
 						
-						Mode = 0;
+						//For pig imges
+						drawPig0();
+						drawSunglasses1();
+						drawWall2();
+						drawWall3();
+						
+						//For cops and robbers images
+						drawRobber0();
+						drawRobber1();
+						drawRobber2();
+						drawPolice3();
+						drawWall4();
+						drawWall5();
+						drawReward6();
+						drawSpeedUp7();
+						
+						MainGameMode = 0;
 						break;
 					}
 					//HowTo
@@ -1733,7 +3959,7 @@ var sketchProc = function(processingInstance) {
 						
 						
 						
-						textSize(18);
+						textSize(14);
 						image(images[0], 10, 120, 50, 50);
 						text(" - Human player : This is your character", 60, 150);
 						
@@ -1741,7 +3967,8 @@ var sketchProc = function(processingInstance) {
 						text(" - Computer player : This is your opponent", 60, 200);
 						
 						
-						text(" - When it is your turn, click the up arrow to start \n rolling the dice and enter to stop rolling it. You \n will move that many spaces. After you and the \n computer have taken turns, You will play a \n quick mini game. The winner gets 10 points. \n The first person to get to the finish line recieves \n 10 points. The player that reaches the finish \n line with the most points wins.", 5, 240);
+						text(" - When it is your turn, click the up arrow to start rolling the dice \n and enter to stop rolling it. You will move that many spaces. \n After you and the computer have taken turns, You will play a \n quick mini game. The winner gets 10 points. The first person to \n get to the finish line recieves 10 points. The player that reaches \n the finish line with the most points wins.", 2, 240);
+						text(" - HINT: if you want to skip watching your character move \n between locations, hit 'ENTER'", 5, 370);
 						
 						break;
 					}
@@ -1757,107 +3984,13 @@ var sketchProc = function(processingInstance) {
 					case 1: {
 						background(0,0,0);
 						drawZoomBoard();
-						PLAYER.state = 0;
 						break;
 					}
 					//Players Turn
 					case 2: {
 						background(0,0,0);
 						drawBoard();
-						fill(232, 225, 160);
 						PLAYER.makeMove();
-						
-			/* 			switch(PLAYER.state){
-							case 0:{//waiting
-								if(PLAYER.tileLoc === TILES.length-1){
-									PLAYER.state = 4;
-								}
-								else{
-									if (keyArray[UP] === 1){
-										PLAYER.state = 1;
-									}
-									image(images[4], 160, 100, 80, 80);
-									textSize(50);
-									text(dice, 185, 157);
-								}
-								break;
-							}
-							case 1:{//rolling
-								dice = (dice + 1) % 6 + 1;
-								if (keyArray[ENTER] === 1){
-									PLAYER.state = 2;
-									PLAYER.tileLoc += dice;
-									if (PLAYER.tileLoc > TILES.length-1 ){
-										PLAYER.tileLoc = TILES.length-1;
-									}
-									PLAYER.currLoc++;
-								}
-								image(images[4], 160, 100, 80, 80);
-								textSize(50);
-								text(dice, 185, 157);
-								break;
-							}
-							case 2:{//pause
-								image(images[4], 160, 100, 80, 80);
-								textSize(50);
-								text(dice, 185, 157);
-								count++;
-								if(count > 100){ 
-									count = 0; 
-									PLAYER.state = 3; 
-									PLAYER.dx = TILES[PLAYER.currLoc].x - PLAYER.x;
-									PLAYER.dy = TILES[PLAYER.currLoc].y - PLAYER.y;
-								}
-								
-								break;
-							}
-							case 3:{//move
-								var dist = 0;
-								if (PLAYER.currLoc === PLAYER.tileLoc){
-									dist = sqrt(sq(TILES[PLAYER.currLoc].x-tileSize/3 - PLAYER.x) + sq(TILES[PLAYER.currLoc].y - PLAYER.y));
-								}
-								else {
-									dist = sqrt(sq(TILES[PLAYER.currLoc].x - PLAYER.x) + sq(TILES[PLAYER.currLoc].y - PLAYER.y));
-								}
-								if (dist > 10){
-									PLAYER.move();
-								}
-								else{
-									if (PLAYER.currLoc === PLAYER.tileLoc){
-										PLAYER.state = 4;
-									}
-									else{
-										PLAYER.currLoc++;
-										if (PLAYER.currLoc === PLAYER.tileLoc){
-											PLAYER.dx = TILES[PLAYER.currLoc].x - PLAYER.x - tileSize/3;
-											PLAYER.dy = TILES[PLAYER.currLoc].y - PLAYER.y;
-										}
-										else {
-											PLAYER.dx = TILES[PLAYER.currLoc].x - PLAYER.x;
-											PLAYER.dy = TILES[PLAYER.currLoc].y - PLAYER.y;
-										}
-									}
-								}
-								break;
-							}
-							case 4:{//pause
-								count++;
-								if(count > 100){ 
-									count = 0; 
-									Mode = 3;
-									PLAYER.state = 0;
-									COMPUTER.state = 0;
-								}
-								
-								if(PLAYER.tileLoc === TILES.length-1 && COMPUTER.tileLoc === TILES.length-1){
-									COMPUTER.score += 10;
-									Mode = 4;
-								}
-								
-								
-								break;
-							}
-						} */
 						break;
 					}
 					//COMPUTERS TURN
@@ -1866,110 +3999,27 @@ var sketchProc = function(processingInstance) {
 						drawBoard();
 						fill(232, 225, 160);
 						COMPUTER.makeMove();
-						/* switch(COMPUTER.state){
-							case 0:{//waiting
-								if(COMPUTER.tileLoc === TILES.length-1){
-									COMPUTER.state = 4;
-								}
-								else{
-									count++;
-									if (count === 100){
-										COMPUTER.state = 1;
-										CountLimit = floor(random(50,120));
-										count = 0;
-									}
-									image(images[4], 160, 100, 80, 80);
-									textSize(50);
-									text(dice, 185, 157);
-								}
-								break;
-							}
-							case 1:{//rolling
-								dice = (dice + 1) % 6 + 1;
-								count++;
-								if (count === CountLimit){
-									COMPUTER.state = 2;
-									count = 0;
-									COMPUTER.tileLoc += dice;
-									if (COMPUTER.tileLoc > TILES.length-1 ){
-										COMPUTER.tileLoc = TILES.length-1;
-									}
-									COMPUTER.currLoc++;
-								}
-								image(images[4], 160, 100, 80, 80);
-								textSize(50);
-								text(dice, 185, 157);
-								break;
-							}
-							case 2:{//pause
-								image(images[4], 160, 100, 80, 80);
-								textSize(50);
-								text(dice, 185, 157);
-								count++;
-								if(count > 100){ 
-									count = 0; 
-									COMPUTER.state = 3; 
-									COMPUTER.dx = TILES[COMPUTER.currLoc].x - COMPUTER.x;
-									COMPUTER.dy = TILES[COMPUTER.currLoc].y - COMPUTER.y;
-								}
-								
-								break;
-							}
-							case 3:{//move
-								var dist = 0;
-								if (COMPUTER.currLoc === COMPUTER.tileLoc){
-									dist = sqrt(sq(TILES[COMPUTER.currLoc].x+tileSize/3 - COMPUTER.x) + sq(TILES[COMPUTER.currLoc].y - COMPUTER.y));
-								}
-								else {
-									dist = sqrt(sq(TILES[COMPUTER.currLoc].x - COMPUTER.x) + sq(TILES[COMPUTER.currLoc].y - COMPUTER.y));
-								}
-								if (dist > 10){
-									COMPUTER.move();
-								}
-								else{
-									if (COMPUTER.currLoc === COMPUTER.tileLoc){
-										COMPUTER.state = 4;
-									}
-									else{
-										COMPUTER.currLoc++;
-										if (COMPUTER.currLoc === COMPUTER.tileLoc){
-											COMPUTER.dx = TILES[COMPUTER.currLoc].x - COMPUTER.x +tileSize/3;
-											COMPUTER.dy = TILES[COMPUTER.currLoc].y - COMPUTER.y;
-										}
-										else {
-											COMPUTER.dx = TILES[COMPUTER.currLoc].x - COMPUTER.x;
-											COMPUTER.dy = TILES[COMPUTER.currLoc].y - COMPUTER.y;
-										}
-									}
-								}
-								break;
-							}
-							case 4:{//pause
-								count++;
-								if(count > 100){ 
-									count = 0; 
-									Mode = 2;
-									COMPUTER.state = 0;
-									COMPUTER.state = 0;
-								}
-								
-								
-								if(COMPUTER.tileLoc === TILES.length-1 && PLAYER.tileLoc === TILES.length-1){
-									Mode = 4;
-									PLAYER.score += 10;
-								}
-								
-								
-								break;
-							}
-						} */
 						break;
 					}
+					//Pick MiniGame
+					case 4: {
+						pickMiniGame();
+						break;
+					}
+					//Play Mini Game
+					case 5:{
+						playMiniGame();
+						break;
+					}
+					
 					//Game Over
-					case 4:{
+					case 8:{
+						centerX = (PLAYER.x+COMPUTER.x)/2;
 						background(0,0,0);
 						drawBoard();
 						text("Game Over", 110, 150);
+						text("Player: "+ PLAYER.score, 110, 50);
+						text("Comp:  "+ COMPUTER.score, 110, 80);
 						if(PLAYER.score > COMPUTER.score){
 							text("You Win", 170, 200);
 						}
@@ -1979,30 +4029,96 @@ var sketchProc = function(processingInstance) {
 						else if(PLAYER.score === COMPUTER.score){
 							text("TIE", 170, 200);
 						}
-						
+						count++;
+						if (count > 100){
+							count = 0;
+							MainGameMode = 9;
+						}
 						
 						break;
 					}
-					
+					//Show Winner
+					case 9:{
+						background(0, 0, 0);
+						textSize(70);
+						var winner;
+						
+						if(PLAYER.score > COMPUTER.score){
+							fill(150, 255, 150);
+							text("You Win", 74, 56+10);
+							fill(100, 205, 100);
+							text("You Win", 77, 53+10);
+							fill(0, 155, 0);
+							text("You Win", 80, 50+10);
+							
+							winner = PLAYER;
+							
+							winner.x = 200;
+							winner.y = 200;
+							winner.size = 200;
+							
+							var centerX = winner.x;
+							var centerY = winner.y+60;
+							noStroke();
+							for(var x = 0; x < 360; x += 2){
+								var radiusX = random(80,200);
+								var radiusY = random(30,150);
+								var point1x = 5*cos(radians(x-90)) + centerX;
+								var point1y = 5*sin(radians(x-90)) + centerY;
+								var point2x = 5*cos(radians(x+90)) + centerX;
+								var point2y = 5*sin(radians(x+90)) + centerY;
+								var point3x = radiusX*cos(radians(x)) + centerX;
+								var point3y = radiusY*sin(radians(x)) + centerY;
+								fill(255-random(0,150), 255, 255-random(0,150));
+								triangle(point1x, point1y, point2x, point2y, point3x, point3y);
+							}
+							
+							winner.draw();
+						}
+						else if(PLAYER.score < COMPUTER.score){
+							fill(255, 150, 150);
+							text("CPU Wins", 40, 56+10);
+							fill(255, 100, 100);
+							text("CPU Wins", 43, 53+10);
+							fill(255, 0, 0);
+							text("CPU Wins", 46, 50+10);
+							winner = COMPUTER;
+							
+							winner.x = 200;
+							winner.y = 200;
+							winner.size = 200;
+							
+							var centerX = winner.x;
+							var centerY = winner.y+60;
+							noStroke();
+							for(var x = 0; x < 360; x += 2){
+								var radiusX = random(80,200);
+								var radiusY = random(30,150);
+								var point1x = 5*cos(radians(x-90)) + centerX;
+								var point1y = 5*sin(radians(x-90)) + centerY;
+								var point2x = 5*cos(radians(x+90)) + centerX;
+								var point2y = 5*sin(radians(x+90)) + centerY;
+								var point3x = radiusX*cos(radians(x)) + centerX;
+								var point3y = radiusY*sin(radians(x)) + centerY;
+								fill(255, 255-random(0,150), 255-random(0,150));
+								triangle(point1x, point1y, point2x, point2y, point3x, point3y);
+							}
+							winner.draw();
+						}
+						else if(PLAYER.score === COMPUTER.score){
+							text("TIE", 50, 50);
+						}
+
+						break;
+					}
 				}
-				
-				if (Mode === 2 || Mode === 3){
-					drawHeader();
-				}
-				//debugging();
+				//showImages();
+				debugging();
 			};    
 
-			
-			
-			
-		}
-		
-		
-		
-    }
-};    
-
-
+		}		
+	}
+}	
 var canvas = document.getElementById("finalProject"); 
 var processingInstance = new Processing(canvas, sketchProc); 
 
