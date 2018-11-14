@@ -3946,7 +3946,7 @@ var sketchProc = function(processingInstance) {
 						drawReward6();
 						drawSpeedUp7();
 						
-						MainGameMode = 0;
+						MainGameMode = 8;
 						break;
 					}
 					//HowTo
@@ -4017,23 +4017,14 @@ var sketchProc = function(processingInstance) {
 						centerX = (PLAYER.x+COMPUTER.x)/2;
 						background(0,0,0);
 						drawBoard();
-						text("Game Over", 110, 150);
-						text("Player: "+ PLAYER.score, 110, 50);
-						text("Comp:  "+ COMPUTER.score, 110, 80);
-						if(PLAYER.score > COMPUTER.score){
-							text("You Win", 170, 200);
-						}
-						else if(PLAYER.score < COMPUTER.score){
-							text("You Lose", 170, 200);
-						}
-						else if(PLAYER.score === COMPUTER.score){
-							text("TIE", 170, 200);
-						}
-						count++;
-						if (count > 100){
-							count = 0;
-							MainGameMode = 9;
-						}
+						textSize(50);
+						text("Final Score", 80, 60);
+						textSize(30);
+						fill(0,155,0);
+						text("Player: "+ PLAYER.score, 30, 110);
+						fill(180, 0, 0);
+						text("CPU:   "+ COMPUTER.score, 230, 110);
+						
 						
 						break;
 					}
