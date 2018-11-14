@@ -3105,8 +3105,14 @@ var sketchProc = function(processingInstance) {
 								if (keyArray[UP] === 1){
 									this.state = 1;
 								}
+								
+								textSize(16);
+								fill(255, 255, 255);
+								text("Click the up arrow to start rolling...", 80, 380);
+								
 							}
 						}
+						
 						break;
 					}
 					case 1:{//rolling
@@ -3122,6 +3128,11 @@ var sketchProc = function(processingInstance) {
 							if (keyArray[ENTER] === 1){
 								doIt = 1;
 							}
+						
+							textSize(16);
+							fill(255, 255, 255);
+							text("Click ENTER to stop rolling...", 90, 380);
+							
 						}
 						if (doIt === 1){
 							this.state = 2;
@@ -3881,6 +3892,10 @@ var sketchProc = function(processingInstance) {
 				fill(255, 251, 0);
 				text("MINI GAMES", 65, 100);
 				
+				textSize(16);
+				fill(255, 255, 255);
+				text("Choose a Mini Game to begin playing...", 60, 380);
+								
 			};
 
 
