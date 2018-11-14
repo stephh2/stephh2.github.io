@@ -3946,7 +3946,7 @@ var sketchProc = function(processingInstance) {
 						drawReward6();
 						drawSpeedUp7();
 						
-						MainGameMode = 8;
+						MainGameMode = 0;
 						break;
 					}
 					//HowTo
