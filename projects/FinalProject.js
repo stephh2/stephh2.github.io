@@ -1148,6 +1148,7 @@ var sketchProc = function(processingInstance) {
 			};
 
 			//--------------FOR PIG MINI GAME--------------
+			{
 			var MiniGameMode = 0;
 			var pigImages = [];
 			var pigTileSize = 40;
@@ -1757,9 +1758,11 @@ var sketchProc = function(processingInstance) {
 					}
 				}
 			};
+			}
 			//---------------------------------------------------
 
 			//---------FOR COPS AND ROBBERS GAME--------------
+			{
 			var copDifficulty = 3;
 			var copImages = [];
 			var copTileSize = 40;
@@ -2428,10 +2431,11 @@ var sketchProc = function(processingInstance) {
 				}
 				for (x = 0; x < 400; x+=copTileSize){ drawWall(x,360);  }
 			};
-
+			}
 			//-----------------------------------------------------------
 
 			//-----------------------PARK IT----------------------------
+			{
 			var PARK_CARS = [];
 			var PARK_MAP;
 			var PARK_myH;
@@ -2724,10 +2728,11 @@ var sketchProc = function(processingInstance) {
 			PARK_CARS = [];
 			PARK_CARS.push(new carObj(300,-80));
 			PARK_myH = new PARK_myHObj(200, 200);
-
+			}
 			//-----------------------------------------------------------
 
 			//----------------------Pyramid game----------------------
+			{
 			var LevelObj = function(len, level){
 				this.length = len;
 				this.x = 0;
@@ -2818,6 +2823,7 @@ var sketchProc = function(processingInstance) {
 			};
 
 			var PYRAMID = new PyramidObj();
+			}
 			//-----------------------------------------------------------
 
 			var LogoObj = function(){
@@ -3018,7 +3024,7 @@ var sketchProc = function(processingInstance) {
 				this.state = -1;
 				this.score = 0;
 				this.finished = 0;
-				
+				this.count = 0;
 				this.angle = 0;
 				
 				if(this.role === "computer"){
@@ -3078,12 +3084,21 @@ var sketchProc = function(processingInstance) {
 				switch(this.state){
 					//dice come in
 					case -1:{
-						if (DICE.fadeIn()){
-							HEADER.fadeIn();
-							this.state = -1;
+						if (this.finished === 0 ){
+							if (DICE.fadeIn()){
+								HEADER.fadeIn();
+								this.state = -1;
+							}
+							else {
+								this.state = 0;
+							}
 						}
 						else {
-							this.state = 0;
+							this.count++;
+							if (this.count === 60){
+								this.state = 0;
+								this.count = 0;
+							}
 						}
 						break;
 					}
@@ -3928,8 +3943,48 @@ var sketchProc = function(processingInstance) {
 					image(images[i], (i*100)%400, floor((i*100)/400)*100,100, 100);
 				}
 			};
-
+			
+			
+			var lastC = 1, lastH = 1;
+			var increaseLoc = function(){
+				var hCode = 72;
+				var cCode = 67;
+				
+				if (keyArray[hCode] === 1 && lastH === 0 && PLAYER.tileLoc < 23){
+					PLAYER.tileLoc++;
+					console.log("Increasing Human Tile Loc : "+ PLAYER.tileLoc);
+				}
+				if (keyArray[cCode] === 1 && lastC === 0 && COMPUTER.tileLoc < 23){
+					COMPUTER.tileLoc++;
+					console.log("Increasing CPU Tile Loc : "+ COMPUTER.tileLoc);
+				}
+				
+				lastC = keyArray[cCode];
+				lastH = keyArray[hCode];
+			};
+			
+			var skipMiniGame = function(){
+				var wCode = 87;
+				var lCode = 76;
+				
+				if (keyArray[wCode] === 1 ){
+					PLAYER.score+=10;
+					MainGameMode = 2;
+					console.log("Skipping MiniGame and Player 'Won'");
+				}
+				if (keyArray[lCode] === 1 ){
+					COMPUTER.score+=10;
+					MainGameMode = 2;
+					console.log("Skipping MiniGame and CPU 'Won'");
+				}
+				
+			};
+			
+			
 			var draw = function() {
+				
+				increaseLoc();
+				
 				switch(MainGameMode){
 					//Make characters
 					case -2: {
@@ -4018,6 +4073,7 @@ var sketchProc = function(processingInstance) {
 					}
 					//Pick MiniGame
 					case 4: {
+						skipMiniGame();
 						pickMiniGame();
 						break;
 					}
@@ -4025,8 +4081,7 @@ var sketchProc = function(processingInstance) {
 					case 5:{
 						playMiniGame();
 						break;
-					}
-					
+					}		
 					//Game Over
 					case 8:{
 						centerX = (PLAYER.x+COMPUTER.x)/2;
@@ -4039,7 +4094,11 @@ var sketchProc = function(processingInstance) {
 						text("Player: "+ PLAYER.score, 30, 110);
 						fill(180, 0, 0);
 						text("CPU:   "+ COMPUTER.score, 230, 110);
-						
+						PLAYER.count++;
+						if (PLAYER.count === 60){
+							MainGameMode = 9;
+							PLAYER.count = 0;
+						}
 						
 						break;
 					}
