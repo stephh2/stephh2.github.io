@@ -1,21 +1,164 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title> Final Project </title>
-	<link rel="icon" href="projects/player.PNG" id="S">
+	<title>		Stephanie Harvey	</title>
+	<link rel="icon" href="Photos/S.png" id="S">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 	<link rel="stylesheet" type="text/css" href="MainPage.css"> 
+
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="tech/processingjs.min.js"></script>
 
 
 </head>
 <body>
-	<div>
-		<canvas  id="finalProject"></canvas>
-	</div>
-	
+
 		
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-nav-demo" aria-expanded="false">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+				<a href="#" class="navbar-brand"><i class="fas fa-user-circle">  </i>  Stephanie Harvey </a>
+			</div>
+			<div class="collapse navbar-collapse" id="bs-nav-demo">
+				<ul class="nav navbar-nav navbar-right">
+					<li onclick="setSlide(0)" class="highlight">
+						<a href="#">Photos</a>
+					</li>
+					<li onclick="setSlide(1)">
+						<a href="#">About Me</a>
+					</li>
+					<li onclick="setSlide(2)">
+						<a href="#">Education</a>
+					</li>
+					<li onclick="setSlide(3)">
+						<a href="#">Projects</a>
+					</li>
+					<li onclick="setSlide(4)">
+						<a href="#">Contact</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+
+
+	<!-- Next and previous buttons -->
+	<i class="fas fa-arrow-alt-circle-left left"  onclick="plusSlides(-1)"></i>
+	<i class="fas fa-arrow-alt-circle-right right"  onclick="plusSlides(1)"></i>	
+
+
+	<div class="content">
+	  	<!-- Full-width images with number text -->
+		<div class="mySlides">
+		    <div id="photos"  style="width:100%">
+				<img class="rotating" width="700px"src="Photos/Photo1.jpg">
+			</div>
+		</div>
+
+		<div class="mySlides">
+		    <div id="About">
+				<h1><b>About Me</b></h1>
+				<p>
+					<img id="ME" src="Photos/ME.JPG">
+					I was born in Galesburg, IL on Thanksgiving of 1996 but by Christmas, my family and I had returned to our home in Montego Bay, Jamaica. We all lived in Jamaica until August of 2004, when my mom got a new job and we moved to Lexington, KY. Lexington was home for 11 years but in August of 2015 I moved to Blacksburg, VA to attend Virginia Polytechnic Institute and State University.
+		   			
+				</p>
+				<p>
+					At Virginia Tech it is common for students to say proudly, "This is Home" and it honestly has become just that. I got involved in many different clubs, groups, and activities that created a family like culture around me. I have been a sister in my social sorority, Gamma Delta Sigma, for 3 years and have even held the position of External Philanthropy chair. I play on an Intramural Softball team and am proud member of the Society of Women in Engineering. If these activities don’t keep me too busy, I enjoy hiking the Appalachian Trail with friends and cheering on the Hokies in all sporting events.
+				</p>
+				<p>
+					A hobby I hope to continue in my future is traveling. It could be around the US (probably going to MLB games), or around the world but I believe that traveling is one of the most important and underrated experiences in a person’s life. I enjoy seeing other cultures around the world and how they live, eat and explore differently than I do. So far, I have been to 15 countries across 4 continents and want to see even more. If given the opportunity, everyone should travel in their life.
+					</p>
+			</div>
+		</div>
+
+		<div class="mySlides">
+		    <div id="EDU">
+				<h1><b>Education</b></h1>
+	   			<img id="PLD" src="Photos/PLD.png">
+				<h3>High School: <a href="https://www.fcps.net/Page/89">Paul Laurence Dunbar High School</a></h3>
+				<p>
+					My High School had about 2,200 students and had several different tracks of education for the goals of each individual student. I chose to follow the track that included 5 AP courses and 1 Dual Enrollment course. By graduation in May of 2015, I had earned a 4.0 GPA and accrued 17 college credits which would later allow me to graduate college in only 3 and a half years.
+				</p>
+			   		
+				<img id="VT" src="Photos/VirginiaTech.png">
+				<h3>College: <a href="https://vt.edu/">Virginia Polytechnic Institute and State University</a></h3>
+				<p>
+					I am about to start my 4th year at Virginia Tech and am excited to graduate in December. I will graduate with my Bachelors of Science in Computer Engineering. I currently have a GPA of 3.6 and have been on the Dean's List 5 of my 6 completed semesters.
+				</p>
+			   	<img id="Udemy" src="Photos/Udemy.webp">
+				<h3>Self-Education</h3>
+			   	<p>
+					Over the last year, I have been teaching myself different programming skills and languages though online courses offered by <a href="https://www.udemy.com">Udemy</a>. These courses include a Web Development and a React Native App Developement class. In this process, I have been able to teach myself how to create this website and soon make the apps I want that aren't available  to me.
+				</p>
+			</div>
+		</div>
+
+		<div class="mySlides">
+		    <div id="Projects">
+		    	<table>
+		    		<tr>
+		    			<td>
+		    				<canvas  id="project3Canvas" class="leftCanvas"></canvas>
+		    			</td>
+		    			<td>
+		    				<canvas  id="project4Canvas" class="rightCanvas"></canvas>
+		    			</td>
+		    		</tr>
+		    		<tr>
+		    			<td>
+		    				<canvas  id="project5Canvas" class="leftCanvas"></canvas>
+		    			</td>
+		    			<td>
+		    				<canvas  id="finalProject" class="rightCanvas"></canvas>
+		    			</td>
+		    		</tr>
+		    	</table>
+		    </div>
+		</div>
+
+		<div class="mySlides">
+		    <div id="Contact">
+		    	<table>
+		    		<tr>
+		    			<td id="contactHeader">
+		    				Contact Me:
+		    			</td>
+		    			<td id="contactInfo">
+		    				<p>Email:           stephh2@vt.edu</p>
+		    			</td>
+		    		</tr>
+		    	</table>
+
+    			<div id="resumeCol">
+    				<button id="resumeBut">
+						<a href="documents/Harvey_Stephanie_Resume.pdf" download="Harvey_Stephanie_Resume.pdf">Resume</a>
+					</button>
+    			</div>
+		    </div>
+		</div>
+
+	</div>
 <script type="text/javascript" src="MainPage.js"></script> 
-<script type="text/javascript" src="projects/FinalProject.js"></script> 
+<!-- <script type="text/javascript" src="projects/Project2.js"></script>  -->
+<!-- <script type="text/javascript" src="projects/Project3.js"></script> 
+<script type="text/javascript" src="projects/Project4.js"></script> 
+<script type="text/javascript" src="projects/Project5.js"></script> 
+<script type="text/javascript" src="projects/FinalProject.js"></script>  -->
+<!-- <script type="text/javascript" src="projects/BrickBreaker.js"></script>  -->
 
 </body>
 </html>

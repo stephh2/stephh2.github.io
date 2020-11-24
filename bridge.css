@@ -1,0 +1,48 @@
+.hidden {
+	display: none;
+}
+
+.disabled {
+	background-color: #aaa;
+}
+
+body {
+	margin: 15px auto;
+    display: table;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+td, th {
+	border: 1px solid black;
+	padding: 5px;
+}
+
+td p {
+	display: inline-block;
+	margin: 0;
+}
+
+td p.full{
+	display: block;
+	text-align: left;
+}
+
+td input {
+	max-width: 40px;
+}
+
+.round {
+	text-align: center;
+}
+
+.num-players-content {
+	margin-bottom: 20px;
+}
+
+#num-players {
+	margin-left: 5px;
+	max-width: 50px;
+}
